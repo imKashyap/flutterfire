@@ -1,4 +1,4 @@
-# Shopify
+# Konnect
 
 * This application is a chatting application built in flutter and backend in firebase.
 
