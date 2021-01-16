@@ -1,5 +1,5 @@
 name: konnect
-description: A new Flutter application.
+description: A new Flutter Chatting application.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -25,6 +25,8 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.1
   firebase_auth: ^0.20.0+1
+  firebase_core: ^0.7.0
+  flutter_facebook_login: ^3.0.0
   google_sign_in: ^4.5.9
   provider: ^4.3.2+4
 

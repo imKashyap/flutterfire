@@ -1,20 +1,32 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:konnect/screens/login_page.dart';
+import 'package:konnect/managers/landing_manger.dart';
+import 'package:konnect/sevices/auth.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // SystemChrome.setEnabledSystemUIOverlays([]);
-    return MaterialApp(
-      
-      debugShowCheckedModeBanner: false,
+    return Provider<AuthBase>(
+      create: (context) => Auth(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Konnect',
       theme: ThemeData(fontFamily: 'GoogleSans'),
-      home: LoginPage(),
+        home: LandingManager(),
+      ),
     );
   }
 }
+
+
 
 // class SplashScreen extends StatelessWidget {
 //   @override

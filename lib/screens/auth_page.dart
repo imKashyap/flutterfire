@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:konnect/utils/colors.dart';
 
-class LoginPage extends StatelessWidget {
+class AuthPage extends StatelessWidget {
   bool _isLoading = false;
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,7 @@ class LoginPage extends StatelessWidget {
           children: [
             _buildBackgroundScreen(),
             Container(
-              height: 450.0,
+              height: 500.0,
               decoration: BoxDecoration(
                   gradient: LinearGradient(
                       colors: [Colors.transparent, Colors.black],
@@ -56,7 +56,7 @@ class LoginPage extends StatelessWidget {
             scale: 11,
           ),
           Text(
-            'Let those words fly\n to your people on Konnect.',
+            'Because anything can happen over a chat.',
             textAlign: TextAlign.center,
             style: Theme.of(context)
                 .textTheme
@@ -78,7 +78,7 @@ class LoginPage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: Text(
-                  'Sign up Free',
+                  'Sign in Free',
                   style: Theme.of(context).textTheme.subtitle1.copyWith(
                         color: Colors.white,
                       ),
@@ -110,10 +110,10 @@ class LoginPage extends StatelessWidget {
               text: 'Continue with Facebook', onPressed: () {
             print('Pressed');
           }),
-          buildSocialLoginButton(context, icon: null, text: 'Log in',
-              onPressed: () {
-            print('Pressed');
-          }),
+          // buildSocialLoginButton(context, icon: null, text: 'Log in',
+          //     onPressed: () {
+          //   print('Pressed');
+          // }),
         ],
       ),
     );
@@ -121,12 +121,12 @@ class LoginPage extends StatelessWidget {
 
   Container _buildBackgroundScreen() {
     return Container(
-      height: 450.0,
+      height: 500.0,
       decoration: BoxDecoration(
           image: DecorationImage(
               alignment: Alignment.topCenter,
-              fit: BoxFit.contain,
-              image: AssetImage('assets/images/bg_login.jpg'))),
+              fit: BoxFit.cover,
+              image: AssetImage('assets/images/login_bg.jpg'))),
     );
   }
 
