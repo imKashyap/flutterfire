@@ -133,7 +133,7 @@ class Auth implements AuthBase {
             json.decode((await graphResponse.transform(utf8.decoder).single));
         final email = graphResponseJSON["email"];
         final signInMethods =
-            await FirebaseAuth.instance.fetchSignInMethodsForEmail(email);
+            await _auth.fetchSignInMethodsForEmail(email);
         print(signInMethods);
         bool isProviderGoogle = signInMethods.contains('google.com');
         if (isProviderGoogle)

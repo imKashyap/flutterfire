@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:konnect/managers/landing_manger.dart';
 import 'package:konnect/sevices/auth.dart';
+import 'package:konnect/utils/colors.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -19,7 +20,13 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Konnect',
-      theme: ThemeData(fontFamily: 'GoogleSans'),
+        theme: ThemeData(
+          primaryColor: kColorPrimary,
+          accentColor: kColorAccent,
+          brightness: Brightness.dark,
+          fontFamily: 'GoogleSans',
+
+        ),
         home: LandingManager(),
       ),
     );

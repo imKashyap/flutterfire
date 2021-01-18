@@ -1,8 +1,22 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
+import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
+import 'package:provider/provider.dart';
 
-class AuthPage extends StatelessWidget {
+class AuthPage extends StatefulWidget {
+  @override
+  _AuthPageState createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage> {
   bool _isLoading = false;
+  bool _toLinkFb = false;
+  String _emailToLink = '';
+  AuthCredential _credsToLink;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,8 +36,8 @@ class AuthPage extends StatelessWidget {
             _buildInteractionScreen(context),
             _isLoading
                 ? Container(
-                  width: double.maxFinite,
-                  height: double.maxFinite,
+                    width: double.maxFinite,
+                    height: double.maxFinite,
                     color: Colors.black54,
                     child: Center(
                       child: SizedBox(
@@ -99,17 +113,17 @@ class AuthPage extends StatelessWidget {
               icon: Image.asset(
                 'assets/images/google-logo.png',
               ),
-              text: 'Continue with Google', onPressed: () {
-            print('Pressed');
-          }),
-          buildSocialLoginButton(context,
-              icon: Image.asset(
-                'assets/images/facebook-logo.png',
-                color: Color(0xFF1748BB),
-              ),
-              text: 'Continue with Facebook', onPressed: () {
-            print('Pressed');
-          }),
+              text: 'Continue with Google',
+              onPressed: () => _isLoading ? null :_signInWithGoogle()),
+          buildSocialLoginButton(
+            context,
+            icon: Image.asset(
+              'assets/images/facebook-logo.png',
+              color: Color(0xFF1748BB),
+            ),
+            text: 'Continue with Facebook',
+            onPressed: () => _isLoading ? null : _signInWithFb(),
+          ),
           // buildSocialLoginButton(context, icon: null, text: 'Log in',
           //     onPressed: () {
           //   print('Pressed');
@@ -170,5 +184,46 @@ class AuthPage extends StatelessWidget {
               ),
             ),
     );
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      final auth = Provider.of<AuthBase>(context, listen: false);
+      await auth.signInWithGoogle(_toLinkFb, _emailToLink, _credsToLink);
+    } on PlatformException catch (e) {
+      print('Login Error: ' + e.code);
+      setState(() {
+        _isLoading = false;
+      });
+      if (e.code != 'ERROR_ABORTED_BY_USER') showErrorDialog(e);
+    }
+  }
+
+  Future<void> _signInWithFb() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      final auth = Provider.of<AuthBase>(context, listen: false);
+      await auth.signInWithFb();
+    } on PlatformException catch (e) {
+      print('Login Error: ' + e.code);
+      if (e.code == 'ERROR_ALREADY_HAS_ACCOUNT') {
+        _toLinkFb = true;
+        _emailToLink = e.details['email'];
+        _credsToLink = e.details['creds'];
+      }
+      setState(() {
+        _isLoading = false;
+      });
+      if (e.code != 'ERROR_ABORTED_BY_USER') showErrorDialog(e);
+    }
+  }
+
+  void showErrorDialog(PlatformException e) {
+    PlatfromrExceptionAlertDialog(title: 'Sign In Failed', e: e).show(context);
   }
 }

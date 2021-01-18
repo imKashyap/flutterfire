@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:konnect/screens/email_sign_in_form.dart';
+import 'package:konnect/screens/auth/email_sign_in_form.dart';
 
 class EmailSignInManager extends StatelessWidget {
   @override
