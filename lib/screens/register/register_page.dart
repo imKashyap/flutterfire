@@ -1,13 +1,14 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:konnect/models/person.dart';
+import 'package:konnect/models/konnector.dart';
 import 'package:konnect/utils/colors.dart';
+import 'package:konnect/utils/dimensions.dart';
 import 'package:konnect/validators/form_validator.dart';
 import 'package:konnect/widgets/image_input.dart';
 import 'package:konnect/widgets/toast_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget with FormValidator {
   final User userToRegister;
@@ -21,8 +22,10 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController _emailController = TextEditingController();
   bool _isSubmitted = false;
   File _pickedImage;
+  int _gender = 0;
+  Dimensions myDim;
 
-  bool get canSubmit => (name != null && _pickedImage != null);
+  bool get canSubmit => name != null;
   void _selectImage(File pickedImage) {
     setState(() {
       _pickedImage = pickedImage;
@@ -53,6 +56,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    myDim = Dimensions(context);
+    const spaceBox = SizedBox(
+      height: 10.0,
+    );
     return Scaffold(
         backgroundColor: Colors.black,
         body: SafeArea(
@@ -79,17 +86,29 @@ class _RegisterPageState extends State<RegisterPage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 10.0),
+                  spaceBox,
+                  spaceBox,
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 16.0),
                     child: Center(
                         child: ImageInput(_selectImage, InputType.profile)),
                   ),
-                  SizedBox(height: 10.0),
-                  _buildDetailsInputField(),
-                  SizedBox(height: 10.0),
+                  spaceBox,
+                  _buildCustomTextField(
+                      controller: _nameController,
+                      prefix: Icons.person_outline,
+                      label: 'Name',
+                      hint: '',
+                      inputType: TextInputType.name,
+                      errorText: nameErrorText,
+                      textCapitals: TextCapitalization.words,
+                      shiftFocusTo: null),
+                  spaceBox,
+                  spaceBox,
+                  _buildGenderRadios(),
+                  spaceBox,
                   _buildSubmitButton(),
-                  SizedBox(height: 10.0),
+                  spaceBox,
                   Text(
                     'Filling up the details accurately will help us ensure an easy connection to your favorites.',
                     textAlign: TextAlign.center,
@@ -103,38 +122,6 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
         ));
-  }
-
-  Widget _buildDetailsInputField() {
-    const spaceBox = SizedBox(
-      height: 20.0,
-    );
-    return Container(
-      child: Column(
-        children: [
-          _buildCustomTextField(
-              controller: _nameController,
-              prefix: Icons.person_outline,
-              label: 'Name',
-              hint: '',
-              inputType: TextInputType.name,
-              errorText: nameErrorText,
-              textCapitals: TextCapitalization.words,
-              shiftFocusTo: null),
-          spaceBox,
-          // _buildCustomTextField(
-          //     controller: _emailController,
-          //     myFocus: _emailInput,
-          //     prefix: Icons.email_outlined,
-          //     label: 'Email Address',
-          //     errorText: emailErrorText,
-          //     textCapitals: TextCapitalization.none,
-          //     inputType: TextInputType.emailAddress,
-          //     hint: 'you@example.com',
-          //     shiftFocusTo: null),
-        ],
-      ),
-    );
   }
 
   Widget _buildCustomTextField(
@@ -186,7 +173,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Container(
       width: double.infinity,
       child: RaisedButton(
-        onPressed: () {},
+        onPressed: _submit,
         color: kColorPrimaryDark,
         child: Padding(
           padding: const EdgeInsets.all(15.0),
@@ -201,14 +188,58 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _submit() async {
     User thisUser = widget.userToRegister;
-    Person registeredUser =
-        Person(thisUser.uid, name, thisUser.email, thisUser.phoneNumber);
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
-    await users.doc().set({
-      'id': registeredUser.id,
-      'name': registeredUser.name,
-      'email': registeredUser.email,
-      'phoneNo': registeredUser.phoneNo
-    });
+    // Konnector registeredUser = Konnector(
+    //     id: thisUser.uid,
+    //     name: name,
+    //     email: thisUser.email,
+    //     phoneNo: thisUser.phoneNumber,
+    //     gender: _gender==0?'M':'F',
+    //     photoUrl: '');
+    // CollectionReference users = FirebaseFirestore.instance.collection('users');
+    // await users.doc(registeredUser.id).set({
+    //   'id': registeredUser.id,
+    //   'name': registeredUser.name,
+    //   'email': registeredUser.email,
+    //   'phoneNo': registeredUser.phoneNo
+    // });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isRegistered', true);
   }
+
+  Widget _buildGenderRadios() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select your Gender',
+        ),
+        Row(children: [
+          Container(
+            width: myDim.width * 0.4,
+            child: RadioListTile(
+                activeColor: kColorPrimary,
+                title: Text('Male'),
+                value: 0,
+                groupValue: _gender,
+                onChanged: (value) {
+                  _setValue(value);
+                }),
+          ),
+          Container(
+            width: myDim.width * 0.4,
+            child: RadioListTile(
+                activeColor: kColorPrimary,
+                title: Text('Female'),
+                value: 1,
+                groupValue: _gender,
+                onChanged: (value) {
+                  _setValue(value);
+                }),
+          )
+        ]),
+      ],
+    );
+  }
+
+  void _setValue(int value) => setState(() => _gender = value);
 }

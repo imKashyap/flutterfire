@@ -1,23 +1,30 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/validators/form_validator.dart';
 
 enum EmailSignInFormType { signIn, signUp }
 
-class EmailSignInModel with FormValidator,ChangeNotifier {
+class EmailSignInModel with FormValidator, ChangeNotifier {
   String email;
   String password;
   bool isLoading;
   EmailSignInFormType formType;
   bool isSubmitted;
+  final bool toLink;
+  final String previousEmail;
+  final AuthCredential creds;
   final AuthBase auth;
 
   EmailSignInModel({
     @required this.auth,
+    @required this.creds,
     this.email = '',
     this.password = '',
     this.formType = EmailSignInFormType.signIn,
     this.isLoading = false,
+    @required this.toLink,
+    @required this.previousEmail,
     this.isSubmitted = false,
   });
 
@@ -38,7 +45,7 @@ class EmailSignInModel with FormValidator,ChangeNotifier {
     updateWith(isSubmitted: true, isLoading: true);
     try {
       if (formType == EmailSignInFormType.signIn) {
-        await auth.loginWithEmail(email, password);
+        await auth.loginWithEmail(email, password,toLink,previousEmail,creds);
       } else {
         await auth.signUpWithEmail(email, password);
       }
@@ -47,10 +54,11 @@ class EmailSignInModel with FormValidator,ChangeNotifier {
       rethrow;
     }
   }
+
   void updateEmail(String email) => updateWith(email: email);
 
   void updatePassword(String password) => updateWith(password: password);
-  
+
   void updateWith(
       {String email,
       String password,

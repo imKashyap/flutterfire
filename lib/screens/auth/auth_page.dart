@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
 import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
@@ -86,9 +87,7 @@ class _AuthPageState extends State<AuthPage> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25.0),
                   side: BorderSide(color: Colors.transparent)),
-              onPressed: () {
-                print('Pressed');
-              },
+              onPressed: _isLoading ? null : () => _signInWithEmail(context),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: Text(
@@ -114,7 +113,7 @@ class _AuthPageState extends State<AuthPage> {
                 'assets/images/google-logo.png',
               ),
               text: 'Continue with Google',
-              onPressed: () => _isLoading ? null :_signInWithGoogle()),
+              onPressed: () => _isLoading ? null : _signInWithGoogle()),
           buildSocialLoginButton(
             context,
             icon: Image.asset(
@@ -221,6 +220,18 @@ class _AuthPageState extends State<AuthPage> {
       });
       if (e.code != 'ERROR_ABORTED_BY_USER') showErrorDialog(e);
     }
+  }
+
+  void _signInWithEmail(BuildContext context) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) => EmailSignInManager(
+                  toLink: _toLinkFb,
+                  previousEmail: _emailToLink,
+                  creds: _credsToLink,
+                )));
   }
 
   void showErrorDialog(PlatformException e) {

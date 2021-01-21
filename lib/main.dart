@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:konnect/managers/landing_manger.dart';
+import 'package:konnect/models/konnector.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -15,8 +16,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // SystemChrome.setEnabledSystemUIOverlays([]);
-    return Provider<AuthBase>(
-      create: (context) => Auth(),
+    return MultiProvider(
+      providers: [
+        Provider<AuthBase>.value(value: Auth()),
+        ChangeNotifierProvider<Konnector>.value(value: Konnector()),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Konnect',
@@ -25,7 +29,6 @@ class MyApp extends StatelessWidget {
           accentColor: kColorAccent,
           brightness: Brightness.dark,
           fontFamily: 'GoogleSans',
-
         ),
         home: LandingManager(),
       ),

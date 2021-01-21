@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:konnect/models/email_sign_in_model.dart';
@@ -9,10 +10,15 @@ class EmailSignInForm extends StatefulWidget {
   EmailSignInForm({@required this.model});
   final EmailSignInModel model;
 
-  static Widget create(BuildContext context) {
+  static Widget create(BuildContext context, bool toLink, String previousEmail,
+      AuthCredential creds) {
     final auth = Provider.of<AuthBase>(context);
     return ChangeNotifierProvider<EmailSignInModel>(
-      create: (_) => EmailSignInModel(auth: auth),
+      create: (_) => EmailSignInModel(
+          auth: auth,
+          toLink: toLink,
+          creds: creds,
+          previousEmail: previousEmail),
       child: Consumer<EmailSignInModel>(
         builder: (context, model, _) => EmailSignInForm(
           model: model,

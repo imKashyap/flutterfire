@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:konnect/models/konnector.dart';
 
 abstract class AuthBase {
   Stream<User> getCurrentAuthState();
@@ -16,12 +17,18 @@ abstract class AuthBase {
   Future<User> signInWithFb();
   Future<void> signOut();
   Future<void> sendPasswordResetEmail(String email);
+  //Future<User> signInWithPhoneNumber({String verificationId, String smsCode});
 }
 
 class Auth implements AuthBase {
   final _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final _fbLogin = FacebookLogin();
+
+  Konnector _getUserFromFirebase(User user) {
+    if (user == null) return null;
+    return Konnector(user: user);
+  }
 
   @override
   Stream<User> getCurrentAuthState() {
@@ -83,6 +90,7 @@ class Auth implements AuthBase {
   @override
   Future<User> signInWithGoogle(bool toLink,
       [String previousEmail, AuthCredential creds]) async {
+        
     final GoogleSignInAccount googleSignInAccount =
         await _googleSignIn.signIn();
     if (googleSignInAccount != null) {
@@ -132,8 +140,7 @@ class Auth implements AuthBase {
         final graphResponseJSON =
             json.decode((await graphResponse.transform(utf8.decoder).single));
         final email = graphResponseJSON["email"];
-        final signInMethods =
-            await _auth.fetchSignInMethodsForEmail(email);
+        final signInMethods = await _auth.fetchSignInMethodsForEmail(email);
         print(signInMethods);
         bool isProviderGoogle = signInMethods.contains('google.com');
         if (isProviderGoogle)
@@ -142,7 +149,7 @@ class Auth implements AuthBase {
               details: {
                 'email': email,
                 'creds': FacebookAuthProvider.credential(
-                   result.accessToken.token,
+                  result.accessToken.token,
                 )
               },
               message: 'Try signing in with Google');
@@ -152,7 +159,7 @@ class Auth implements AuthBase {
               details: {
                 'email': email,
                 'creds': FacebookAuthProvider.credential(
-                 result.accessToken.token,
+                  result.accessToken.token,
                 )
               },
               message: 'Try signing in with Email & Password');
@@ -174,4 +181,23 @@ class Auth implements AuthBase {
   Future<void> sendPasswordResetEmail(String email) async {
     return _auth.sendPasswordResetEmail(email: email);
   }
+
+  // @override
+  // Future<User> signInWithPhoneNumber(
+  //     {String verificationId, String smsCode}) async {
+  //   try {
+  //     final AuthCredential credential = PhoneAuthProvider.credential(
+  //       verificationId: verificationId,
+  //       smsCode: smsCode,
+  //     );
+
+  //     final User user = (await _auth.signInWithCredential(credential)).user;
+  //     return user;
+  //     widget.userToLink.linkWithCredential(credential);
+
+  //     showSnackbar("Successfully signed in UID: ${user.uid}");
+  //   } catch (e) {
+  //     showSnackbar("Failed to sign in: " + e.toString());
+  //   }
+  // }
 }

@@ -3,6 +3,7 @@ import 'package:country_pickers/country_picker_dropdown.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:konnect/models/konnector.dart';
 
 class AddPhonePage extends StatefulWidget {
   final User userToLink;
@@ -116,8 +117,8 @@ class _AddPhonePageState extends State<AddPhonePage> {
   Future<void> verifyPhoneNumber() async {
     PhoneVerificationCompleted verificationCompleted =
         (PhoneAuthCredential phoneAuthCredential) async {
-      await _auth.signInWithCredential(phoneAuthCredential);
       widget.userToLink.linkWithCredential(phoneAuthCredential);
+      await _auth.signInWithCredential(phoneAuthCredential);
       showSnackbar(
           "Phone number automatically verified and user signed in: ${_auth.currentUser.uid}");
     };
@@ -139,7 +140,7 @@ class _AddPhonePageState extends State<AddPhonePage> {
     try {
       await _auth.verifyPhoneNumber(
           phoneNumber: "+91"+_phoneNumberController.text,
-          timeout: const Duration(seconds: 5),
+          timeout: const Duration(seconds: 60),
           verificationCompleted: verificationCompleted,
           verificationFailed: verificationFailed,
           codeSent: codeSent,
@@ -155,11 +156,10 @@ class _AddPhonePageState extends State<AddPhonePage> {
         verificationId: _verificationId,
         smsCode: _smsController.text,
       );
+      await widget.userToLink.linkWithCredential(credential);
+      await _auth.signInWithCredential(credential);
 
-      final User user = (await _auth.signInWithCredential(credential)).user;
-      widget.userToLink.linkWithCredential(credential);
-
-      showSnackbar("Successfully signed in UID: ${user.uid}");
+      //showSnackbar("Successfully signed in UID: ${user.uid}");
     } catch (e) {
       showSnackbar("Failed to sign in: " + e.toString());
     }
