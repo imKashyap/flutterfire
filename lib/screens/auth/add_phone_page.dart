@@ -3,7 +3,6 @@ import 'package:country_pickers/country_picker_dropdown.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:konnect/models/konnector.dart';
 
 class AddPhonePage extends StatefulWidget {
   final User userToLink;
@@ -117,7 +116,7 @@ class _AddPhonePageState extends State<AddPhonePage> {
   Future<void> verifyPhoneNumber() async {
     PhoneVerificationCompleted verificationCompleted =
         (PhoneAuthCredential phoneAuthCredential) async {
-      widget.userToLink.linkWithCredential(phoneAuthCredential);
+      await widget.userToLink.linkWithCredential(phoneAuthCredential);
       await _auth.signInWithCredential(phoneAuthCredential);
       showSnackbar(
           "Phone number automatically verified and user signed in: ${_auth.currentUser.uid}");

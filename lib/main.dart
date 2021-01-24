@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:konnect/managers/landing_manger.dart';
 import 'package:konnect/models/konnector.dart';
+import 'package:konnect/screens/auth/otp_page.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
           fontFamily: 'GoogleSans',
         ),
-        home: LandingManager(),
+        home: OtpPage(),
       ),
     );
   }
