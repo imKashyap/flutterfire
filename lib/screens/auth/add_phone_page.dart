@@ -104,7 +104,7 @@ class _AddPhonePageState extends State<AddPhonePage> {
               borderSide: BorderSide(color: Colors.red),
               borderRadius: BorderRadius.all(Radius.circular(5.0))),
         ),
-        initialPhoneNumber: phoneNumber,
+        initialPhoneNumber: "phoneNumber",
         initialSelection: '+91',
       ),
     );
