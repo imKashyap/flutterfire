@@ -45,12 +45,18 @@ class PhoneAuthModel with FormValidator, ChangeNotifier {
 
   Future<void> verifyPhoneNumber() async {
     PhoneVerificationCompleted verificationCompleted =
-        (PhoneAuthCredential phoneAuthCredential) async {
-      await userToLink.linkWithCredential(phoneAuthCredential);
-      await auth.signInWithCredential(phoneAuthCredential);
-      print(
-          "Phone number automatically verified and user signed in: ${auth.currentUser.uid}");
-    };
+        type == PhoneAuthType.login
+            ? (PhoneAuthCredential phoneAuthCredential) async {
+                await auth.signInWithCredential(phoneAuthCredential);
+                print(
+                    "Phone number automatically verified and user signed in: ${auth.currentUser.uid}");
+              }
+            : (PhoneAuthCredential phoneAuthCredential) async {
+                await userToLink.linkWithCredential(phoneAuthCredential);
+                await auth.signInWithCredential(phoneAuthCredential);
+                print(
+                    "Phone number automatically verified and user signed in: ${auth.currentUser.uid}");
+              };
     PhoneVerificationFailed verificationFailed =
         (FirebaseAuthException authException) {
       print(
@@ -88,11 +94,17 @@ class PhoneAuthModel with FormValidator, ChangeNotifier {
         verificationId: verId,
         smsCode: otp,
       );
-      await userToLink.linkWithCredential(credential);
-      //await auth.signInWithCredential(credential);
+      type == PhoneAuthType.login
+          ? await auth.signInWithCredential(credential)
+          : await userToLink.linkWithCredential(credential);
+      //
     } catch (e) {
       print("Failed to sign in: " + e.toString());
       rethrow;
     }
   }
+
+  // Future<void> checkUser(UserCredential userCreds){
+  //   if(userCreds.additionalUserInfo.isNewUser)
+  // }
 }

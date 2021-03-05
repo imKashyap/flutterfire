@@ -8,6 +8,7 @@ import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
 import 'package:provider/provider.dart';
 
 import '../chat/home_page.dart';
+import 'phone_login_page.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -109,7 +110,8 @@ class _AuthPageState extends State<AuthPage> {
               ),
               text: 'Continue with phone number', onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(
-                fullscreenDialog: true, builder: (c) => HomePage()));
+                fullscreenDialog: true,
+                builder: (c) => PhoneLoginPage.create()));
           }),
           buildSocialLoginButton(context,
               icon: Image.asset(
