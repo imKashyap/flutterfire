@@ -25,7 +25,7 @@ class LandingManager extends StatelessWidget {
               return AuthPage();
             else {
               if (thisUser.phoneNumber == null || thisUser.phoneNumber.isEmpty)
-                return AddPhonePage(snapshot.data);
+                return AddPhonePage.create(snapshot.data);
               else {
                 return FutureBuilder<SharedPreferences>(
                     future: SharedPreferences.getInstance(),

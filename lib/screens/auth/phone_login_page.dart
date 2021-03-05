@@ -2,31 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:konnect/screens/auth/otp_page.dart';
 import 'package:konnect/screens/auth/phone_login_ui.dart';
+import 'package:konnect/sevices/phone_auth_model.dart';
 import 'package:konnect/utils/dimensions.dart';
-import 'package:konnect/validators/form_validator.dart';
 import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
+import 'package:provider/provider.dart';
 
-class PhoneLoginPage extends StatefulWidget with FormValidator {
+class PhoneLoginPage extends StatefulWidget {
+  PhoneLoginPage({@required this.model});
+  final PhoneAuthModel model;
+
+  static Widget create() {
+    return ChangeNotifierProvider<PhoneAuthModel>(
+      create: (_) => PhoneAuthModel(
+        type: PhoneAuthType.login,
+      ),
+      child: Consumer<PhoneAuthModel>(
+        builder: (context, model, _) => PhoneLoginPage(
+          model: model,
+        ),
+      ),
+    );
+  }
+
   @override
   _PhoneLoginPageState createState() => _PhoneLoginPageState();
 }
 
 class _PhoneLoginPageState extends State<PhoneLoginPage> {
   final TextEditingController _phoneController = TextEditingController();
-  bool _isLoading = false;
-  bool _isSubmitted = false;
   String _countryCode = '91';
   String initialCountry = 'IN';
-
   String get phone => _phoneController.text.trim();
-  bool get canSubmit {
-    return widget.phoneValidator.isValid(phone) && !_isLoading;
-  }
 
-  String get phoneErrorText {
-    bool showErrorText = _isSubmitted && !widget.phoneValidator.isValid(phone);
-    return showErrorText ? widget.phoneError : null;
-  }
+
 
   Dimensions myDim;
   @override
@@ -105,18 +113,6 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
     ];
   }
 
-  // Widget _buildDropdownItem(Country country) => Container(
-  //       child: Row(
-  //         children: <Widget>[
-  //           CountryPickerUtils.getDefaultFlagImage(country),
-  //           SizedBox(
-  //             width: 8.0,
-  //           ),
-  //           Text("+${country.phoneCode}"),
-  //         ],
-  //       ),
-  //     );
-
   Column _welcomeText() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,8 +146,6 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
       _isLoading = true;
     });
     try {
-      // final sessionId = await Provider.of<AuthHandler>(context, listen: false)
-      //     .generateOtp('+' + _countryCode + phone);
       // ToastWidget(context).showToast('OTP Sent');
       setState(() {
         _isLoading = false;
@@ -159,7 +153,6 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
       Navigator.of(context).push(MaterialPageRoute(
           builder: (ctx) => OtpPage(
                 phoneNo: '+' + _countryCode + phone,
-                sessionId: 'sessionId',
               )));
     } on PlatformException catch (e) {
       setState(() {

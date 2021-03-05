@@ -2,12 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:konnect/managers/email_signin_manager.dart';
-import 'package:konnect/screens/auth/add_phone_page.dart';
-import 'package:konnect/screens/auth/phone_login_page.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
 import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
 import 'package:provider/provider.dart';
+
+import '../chat/home_page.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -109,7 +109,7 @@ class _AuthPageState extends State<AuthPage> {
               ),
               text: 'Continue with phone number', onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(
-                fullscreenDialog: true, builder: (c) => PhoneLoginPage()));
+                fullscreenDialog: true, builder: (c) => HomePage()));
           }),
           buildSocialLoginButton(context,
               icon: Image.asset(

@@ -1,20 +1,20 @@
 import 'dart:async';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:konnect/utils/colors.dart';
+import 'package:konnect/sevices/phone_auth_model.dart';
 import 'package:konnect/utils/dimensions.dart';
 import 'package:konnect/validators/form_validator.dart';
-import 'package:konnect/widgets/my_clipper.dart';
 import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
-
+import 'package:pin_code_fields/pin_code_fields.dart';
+import '../../utils/colors.dart';
+import '../register/register_page.dart';
 
 class OtpPage extends StatefulWidget with FormValidator {
-  final String phoneNo;
-  final String sessionId;
+  final PhoneAuthModel model;
   OtpPage({
     Key key,
-    @required this.phoneNo,
-    @required this.sessionId,
+    @required this.model,
   }) : super(key: key);
 
   @override
@@ -22,54 +22,30 @@ class OtpPage extends StatefulWidget with FormValidator {
 }
 
 class _OtpPageState extends State<OtpPage> {
-  String get sessid => _hasResent ? newSessionId : widget.sessionId;
-
   // ToastWidget _toast;
-  // @override
+  @override
   void initState() {
     super.initState();
     _startTimer();
+    errorController = StreamController<ErrorAnimationType>();
   }
 
-  String newSessionId = '';
-  String _otp = '';
   bool _isLoading = false;
   bool _isSubmitted = false;
+
+  PhoneAuthModel get model => widget.model;
   bool _isResending = false;
-  bool _hasResent = false;
-  final TextEditingController _controller1 = TextEditingController();
-  final TextEditingController _controller2 = TextEditingController();
-  final TextEditingController _controller3 = TextEditingController();
-  final TextEditingController _controller4 = TextEditingController();
-  final TextEditingController _controller5 = TextEditingController();
-  final TextEditingController _controller6 = TextEditingController();
-  final FocusNode _otpFocusNode1 = FocusNode();
-  final FocusNode _otpFocusNode2 = FocusNode();
-  final FocusNode _otpFocusNode3 = FocusNode();
-  final FocusNode _otpFocusNode4 = FocusNode();
-  final FocusNode _otpFocusNode5 = FocusNode();
-  final FocusNode _otpFocusNode6 = FocusNode();
+
   String get otpErroText {
-    bool showErrorText = _isSubmitted && !widget.otpValidator.isValid(_otp);
+    bool showErrorText = !widget.otpValidator.isValid(model.otp);
     return showErrorText ? widget.otpError : null;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _controller1.dispose();
-    _controller2.dispose();
-    _controller3.dispose();
-    _controller4.dispose();
-    _controller5.dispose();
-    _controller6.dispose();
-    _otpFocusNode1.dispose();
-    _otpFocusNode2.dispose();
-    _otpFocusNode3.dispose();
-    _otpFocusNode4.dispose();
-    _otpFocusNode5.dispose();
-    _otpFocusNode6.dispose();
-  }
+  TextEditingController textEditingController = TextEditingController();
+  // ..text = "123456";
+
+  StreamController<ErrorAnimationType> errorController;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   Dimensions myDim;
   @override
@@ -84,32 +60,14 @@ class _OtpPageState extends State<OtpPage> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: ListView(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              height: myDim.height * 0.3,
-              padding: const EdgeInsets.only(top: 10.0),
-              child: Image(
-                image: AssetImage('assets/images/phone.png'),
-              ),
-            ),
-            ClipPath(
-              clipper: MyClipper(),
-              child: Container(
-                height: myDim.height * 0.7,
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                decoration: BoxDecoration(
-                  color: kColorPrimaryDark,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: _buildChildren(),
-                ),
-              ),
-            ),
-          ],
-        ),
+        body: SafeArea(
+            child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: myDim.width * 0.04, vertical: myDim.height * 0.01),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: _buildChildren()),
+        )),
       ),
     );
   }
@@ -119,71 +77,79 @@ class _OtpPageState extends State<OtpPage> {
       height: 15.0,
     );
     return [
-      SizedBox(
-        height: myDim.height * 0.12,
-      ),
       _buildInfoText(),
       spacebox,
-      _buildOtpInput(),
       spacebox,
+      _buildOTPField(),
       spacebox,
-      ElevatedButton(
-          onPressed: _isLoading ? null : _verifyOtp,
-          child: _isLoading
-              ? SizedBox(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 2.0,
-                  ),
-                  height: 25.0,
-                  width: 25.0,
-                )
-              : Text(
-                  'Next',
-                  textScaleFactor: myDim.textScaleFactor,
-                  style: TextStyle(
-                      color: Colors.white, fontSize: myDim.width * 0.05),
+      _isLoading
+          ? Center(
+              child: SizedBox(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(kColorPrimary),
+                  strokeWidth: 2.0,
                 ),
-          ),
+                height: 25.0,
+                width: 25.0,
+              ),
+            )
+          : _buildVerifyButton(),
       spacebox,
       GestureDetector(
-          onTap: _counter > 0 ? () {} : _resendOtp,
+          onTap: _counter > 0 || _isLoading ? null : _resendOtp,
           child: _isResending
-              ? SizedBox(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 2.0,
+              ? Center(
+                  child: SizedBox(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2.0,
+                    ),
+                    height: 25.0,
+                    width: 25.0,
                   ),
-                  height: 25.0,
-                  width: 25.0,
                 )
               : Text(
                   _counter > 0
                       ? 'Resend code in $_counter s.'
                       : 'Resend code now.',
+                  textAlign: TextAlign.center,
                   textScaleFactor: myDim.textScaleFactor,
-                  style: TextStyle(
-                      color: Colors.white, fontSize: myDim.width * 0.045),
+                  style: Theme.of(context).textTheme.bodyText2.copyWith(
+                        color: Colors.white,
+                      ),
                 )),
+      spacebox,
       spacebox,
       Container(
         height: myDim.height * 0.07,
         width: double.maxFinite,
-        child: OutlineButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(40.0),
+        child: OutlinedButton(
+          style: ButtonStyle(
+            side: MaterialStateProperty.resolveWith<BorderSide>(
+                (Set<MaterialState> states) =>
+                    BorderSide(color: kColorPrimary)),
+            shape: MaterialStateProperty.resolveWith<OutlinedBorder>(
+              (Set<MaterialState> states) => RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(40.0),
+                ),
+              ),
             ),
           ),
-          borderSide: BorderSide(color: Colors.white),
-          onPressed: () {
-            _timer.cancel();
-            Navigator.of(context).pop();
-          },
-          child: Text('Reset Mobile Number',
-              textScaleFactor: myDim.textScaleFactor,
-              style: TextStyle(
-                  color: Colors.white, fontSize: myDim.width * 0.045)),
+          // borderSide: BorderSide(color: kColorPrimary),
+          onPressed: _isLoading || _isResending
+              ? null
+              : () {
+                  _timer.cancel();
+                  Navigator.of(context).pop();
+                },
+          child: Text(
+            'Reset Mobile Number',
+            textScaleFactor: myDim.textScaleFactor,
+            style: Theme.of(context).textTheme.bodyText2.copyWith(
+                  color: Colors.white,
+                ),
+          ),
         ),
       )
     ];
@@ -191,9 +157,10 @@ class _OtpPageState extends State<OtpPage> {
 
   Widget _buildInfoText() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Enter OTP',
+          'Phone Number Verification',
           textScaleFactor: myDim.textScaleFactor,
           style: TextStyle(
             color: Colors.white,
@@ -201,90 +168,99 @@ class _OtpPageState extends State<OtpPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'A One Time Password has been sent to ',
-              textScaleFactor: myDim.textScaleFactor,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: myDim.width * 0.04,
+        SizedBox(
+          height: myDim.height * 0.02,
+        ),
+        Center(
+          child: Column(
+            children: [
+              Text(
+                'Enter the 6-digit code sent to ',
+                textAlign: TextAlign.center,
+                textScaleFactor: myDim.textScaleFactor,
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: myDim.width * 0.04,
+                ),
               ),
-            ),
-            Text(
-              widget.phoneNo,
-              textScaleFactor: myDim.textScaleFactor,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: myDim.width * 0.04,
+              Text(
+                model.phoneNo,
+                textAlign: TextAlign.center,
+                textScaleFactor: myDim.textScaleFactor,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade600,
+                  fontSize: myDim.width * 0.04,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOTPField() {
+    return PinCodeTextField(
+      textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+      appContext: context,
+      pastedTextStyle: TextStyle(
+        color: Colors.green.shade600,
+        fontWeight: FontWeight.bold,
+      ),
+      length: 6,
+      animationType: AnimationType.fade,
+      pinTheme: PinTheme(
+        activeColor: Colors.grey.shade900,
+        inactiveColor: _isSubmitted ? Colors.red : Colors.grey.shade900,
+        selectedColor: _isSubmitted ? Colors.red : Colors.grey.shade900,
+        inactiveFillColor: Colors.grey.shade900,
+        selectedFillColor: Colors.grey.shade900,
+        shape: PinCodeFieldShape.box,
+        borderRadius: BorderRadius.circular(3),
+        fieldHeight: 50,
+        fieldWidth: 40,
+        activeFillColor: Colors.grey.shade900,
+      ),
+      cursorColor: Colors.white,
+      animationDuration: Duration(milliseconds: 300),
+      backgroundColor: Colors.black,
+      enableActiveFill: true,
+      errorAnimationController: errorController,
+      controller: textEditingController,
+      keyboardType: TextInputType.number,
+      boxShadows: [
+        BoxShadow(
+          offset: Offset(0, 1),
+          color: Colors.black12,
+          blurRadius: 10,
         )
       ],
+      onCompleted: (value) {
+        model.updateOtp(value);
+        _verifyOtp();
+      },
+      onChanged: (value) {
+        model.updateOtp(value);
+      },
+      beforeTextPaste: (text) {
+        print("Allowing to paste $text");
+        //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
+        //but you can show anything you want here, like your pop up saying wrong paste format or etc
+        return true;
+      },
     );
   }
 
-  Widget _buildOtpInput() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildNumInputBox(_otpFocusNode2, null, null, _controller1),
-        _buildNumInputBox(
-            _otpFocusNode3, _otpFocusNode2, _otpFocusNode1, _controller2),
-        _buildNumInputBox(
-            _otpFocusNode4, _otpFocusNode3, _otpFocusNode2, _controller3),
-        _buildNumInputBox(
-            _otpFocusNode5, _otpFocusNode4, _otpFocusNode3, _controller4),
-        _buildNumInputBox(
-            _otpFocusNode6, _otpFocusNode5, _otpFocusNode4, _controller5),
-        _buildNumInputBox(null, _otpFocusNode6, _otpFocusNode5, _controller6)
-      ],
-    );
-  }
-
-  Widget _buildNumInputBox(FocusNode nextNode, FocusNode myFocus,
-      FocusNode prevNode, TextEditingController controller) {
-    return Container(
-      width: 45.0,
-      height: 50.0,
-      child: TextField(
-        controller: controller,
-        maxLength: 1,
-        maxLengthEnforced: true,
-        textAlign: TextAlign.center,
-        focusNode: myFocus,
-        decoration: InputDecoration(
-          counterText: '',
-          enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),
-              borderRadius: BorderRadius.all(Radius.circular(5.0))),
-          focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),
-              borderRadius: BorderRadius.all(Radius.circular(5.0))),
-          filled: true,
-          errorText: otpErroText == null ? null : '',
-          fillColor: Colors.black,
-          enabled: _isLoading == false,
-        ),
-        enabled: !_isLoading && !_isResending,
-        keyboardType: TextInputType.numberWithOptions(),
-        textInputAction:
-            nextNode == null ? TextInputAction.done : TextInputAction.next,
-        onChanged: (val) {
-          if (nextNode != null && val.trim().isNotEmpty)
-            FocusScope.of(context).requestFocus(nextNode);
-          else if (prevNode != null && val.trim().isEmpty)
-            FocusScope.of(context).requestFocus(prevNode);
-        },
-        onEditingComplete: () {
-          if (nextNode != null)
-            FocusScope.of(context).requestFocus(nextNode);
-          else
-            _verifyOtp();
-        },
+  Widget _buildVerifyButton() {
+    return ElevatedButton(
+      onPressed: !_isLoading || _isResending ? _verifyOtp : null,
+      style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) => kColorPrimary)),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Text('Verify'),
       ),
     );
   }
@@ -309,27 +285,25 @@ class _OtpPageState extends State<OtpPage> {
   }
 
   Future<void> _verifyOtp() async {
-    _otp = _controller1.text +
-        _controller2.text +
-        _controller3.text +
-        _controller4.text +
-        _controller5.text +
-        _controller6.text;
-    if (!widget.otpValidator.isValid(_otp)) return;
-    try {
+    if (!model.isValidOtp) {
+      setState(() {
+        _isSubmitted = true;
+      });
+      errorController.add(ErrorAnimationType.shake);
+    } else {
       setState(() {
         _isLoading = true;
       });
-      // await Provider.of<AuthHandler>(context, listen: false).verifyOtp(
-      //   phoneNo: widget.phoneNo,
-      //   otp: _otp,
-      //   sessionId: sessid,
-      // );
+      try {
+        await model.signInWithPhoneNumber();
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (context) => RegisterPage(model.userToLink)),
+            (Route<dynamic> route) => false);
+      } catch (e) {
+        print("error " + e.message);
+      }
       _timer.cancel();
-      Navigator.pop(context);
-    } on PlatformException catch (e) {
-      showErrorDialog(e);
-    } finally {
       setState(() {
         _isLoading = false;
       });
@@ -341,20 +315,19 @@ class _OtpPageState extends State<OtpPage> {
       setState(() {
         _isResending = true;
       });
-      // final thisSessionId =
-      //     await Provider.of<AuthHandler>(context, listen: false)
-      //         .generateOtp(widget.phoneNo);
-      // _toast.showToast('Code Resent');
-      // newSessionId = thisSessionId;
       setState(() {
         _startTimer();
       });
+      try {
+        await model.verifyPhoneNumber();
+      } catch (e) {
+        print("error " + e.message);
+      }
     } on PlatformException catch (e) {
       showErrorDialog(e);
     } finally {
       setState(() {
         _isResending = false;
-        _hasResent = true;
       });
     }
   }
@@ -362,5 +335,11 @@ class _OtpPageState extends State<OtpPage> {
   void showErrorDialog(PlatformException e) {
     PlatfromrExceptionAlertDialog(title: 'Verification Failed', e: e)
         .show(context);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    errorController.close();
   }
 }

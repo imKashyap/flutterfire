@@ -100,16 +100,27 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
           ? _buildForgotPassword()
           : Padding(padding: const EdgeInsets.all(8.0)),
       SizedBox(height: 8.0),
-      ElevatedButton(
-        onPressed: model.canSubmit ? _submit : null,
-        style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) => kColorPrimary)),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(model.primaryButtonText),
-        ),
-      ),
+      model.isLoading
+          ? Center(
+              child: SizedBox(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(kColorPrimary),
+                  strokeWidth: 2.0,
+                ),
+                height: 25.0,
+                width: 25.0,
+              ),
+            )
+          : ElevatedButton(
+              onPressed: model.canSubmit ? _submit : null,
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) => kColorPrimary)),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(model.primaryButtonText),
+              ),
+            ),
       SizedBox(height: 8.0),
       TextButton(
         child: Text(

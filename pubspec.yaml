@@ -39,6 +39,7 @@ dependencies:
   shared_preferences: ^2.0.3
   country_code_picker: ^1.7.0
   international_phone_input: ^1.0.4
+  pin_code_fields: ^6.1.0
 
 dev_dependencies:
   flutter_test:
