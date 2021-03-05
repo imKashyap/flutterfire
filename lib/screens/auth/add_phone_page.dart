@@ -1,5 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:international_phone_input/international_phone_input.dart';
+import 'package:konnect/utils/colors.dart';
+import 'package:konnect/utils/dimensions.dart';
 
 class AddPhonePage extends StatefulWidget {
   final User userToLink;
@@ -14,48 +17,23 @@ class _AddPhonePageState extends State<AddPhonePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _smsController = TextEditingController();
   String _verificationId;
+  Dimensions myDim;
   @override
   Widget build(BuildContext context) {
+    myDim = Dimensions(context);
     return Scaffold(
         key: _scaffoldKey,
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 10.0,
-              horizontal: 20.0,
-            ),
+            padding: EdgeInsets.symmetric(
+                horizontal: myDim.width * 0.04, vertical: myDim.height * 0.01),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Enter phone number',
-                  style: Theme.of(context).textTheme.headline5.copyWith(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: TextField(
-                        controller: _phoneNumberController,
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Phone Number",
-                        ),
-                        onChanged: (value) {
-                          // this.phoneNo=value;
-                          // print(value);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
                 Text(
                   'A 6-digit code will be sent by SMS to confirm your phone number.',
                   style: Theme.of(context).textTheme.subtitle2,
@@ -81,6 +59,67 @@ class _AddPhonePageState extends State<AddPhonePage> {
             ),
           ),
         ));
+  }
+    List<Widget> _buildChildren() {
+    return [
+      SizedBox(height: 30.0),
+      Text(
+        'Enter your phone number',
+        textScaleFactor: myDim.textScaleFactor,
+        style: Theme.of(context).textTheme.subtitle2,
+      ),
+      SizedBox(height: 10.0),
+      _buildPhoneField(),
+      SizedBox(height: 20),
+      _buildInfoText(),
+      ElevatedButton(
+        onPressed: () {},
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) => kColorPrimary)),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text('Continue'),
+        ),
+      ),
+    ];
+  }
+
+  Container _buildPhoneField() {
+    return Container(
+      height: myDim.height * 0.06,
+      child: InternationalPhoneInput(
+        onPhoneNumberChange: onPhoneNumberChange,
+        decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+              borderRadius: BorderRadius.all(Radius.circular(5.0))),
+          focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: kColorPrimary),
+              borderRadius: BorderRadius.all(Radius.circular(5.0))),
+          errorBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
+              borderRadius: BorderRadius.all(Radius.circular(5.0))),
+          focusedErrorBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
+              borderRadius: BorderRadius.all(Radius.circular(5.0))),
+        ),
+        initialPhoneNumber: phoneNumber,
+        initialSelection: '+91',
+      ),
+    );
+  }
+
+  Widget _buildInfoText() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        'A 6-digit code will be sent by SMS to confirm your phone number.',
+        textAlign: TextAlign.center,
+        style:
+            Theme.of(context).textTheme.bodyText2.copyWith(color: Colors.grey),
+      ),
+    );
   }
 
   Widget _buildSubmitButton() {
