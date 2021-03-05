@@ -7,7 +7,7 @@ import 'package:konnect/utils/colors.dart';
 import 'package:konnect/utils/dimensions.dart';
 import 'package:konnect/validators/form_validator.dart';
 import 'package:konnect/widgets/image_input.dart';
-import 'package:konnect/widgets/toast_widget.dart';
+// import 'package:konnect/widgets/toast_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget with FormValidator {
@@ -32,12 +32,12 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
-  ToastWidget _toast;
-  @override
-  void initState() {
-    super.initState();
-    _toast = ToastWidget();
-  }
+  // ToastWidget _toast;
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _toast = ToastWidget();
+  // }
 
   @override
   void dispose() {
@@ -204,6 +204,7 @@ class _RegisterPageState extends State<RegisterPage> {
     // });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('isRegistered', true);
+    Navigator.of(context).pop();
   }
 
   Widget _buildGenderRadios() {

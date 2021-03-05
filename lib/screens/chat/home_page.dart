@@ -10,11 +10,15 @@ class HomePage extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Homepage'),
-          RaisedButton(onPressed: () async {
-            await auth.signOut();
-          },
-          child: Text('Sign Out'),)
+          Text(
+            'Homepage',
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await auth.signOut();
+            },
+            child: Text('Sign Out'),
+          )
         ],
       ),
     );

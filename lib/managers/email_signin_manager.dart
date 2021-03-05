@@ -11,18 +11,13 @@ class EmailSignInManager extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: Colors.black,
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: Text('Sign In'),
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Card(
-              child: EmailSignInForm.create(
-                  context, toLink, previousEmail, creds)),
-        ),
+        child: EmailSignInForm.create(context, toLink, previousEmail, creds),
       ),
     );
   }

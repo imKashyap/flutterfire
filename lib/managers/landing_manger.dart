@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:konnect/models/konnector.dart';
 import 'package:konnect/screens/auth/add_phone_page.dart';
 import 'package:konnect/screens/auth/auth_page.dart';
 import 'package:konnect/screens/chat/home_page.dart';

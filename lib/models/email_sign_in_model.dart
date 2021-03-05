@@ -45,10 +45,21 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
     updateWith(isSubmitted: true, isLoading: true);
     try {
       if (formType == EmailSignInFormType.signIn) {
-        await auth.loginWithEmail(email, password,toLink,previousEmail,creds);
+        await auth.loginWithEmail(
+            email, password, toLink, previousEmail, creds);
       } else {
         await auth.signUpWithEmail(email, password);
       }
+    } catch (e) {
+      updateWith(isLoading: false);
+      rethrow;
+    }
+  }
+
+  Future<void> resetPass() async {
+    updateWith(isSubmitted: true, isLoading: true);
+    try {
+        await auth.sendPasswordResetEmail(email);
     } catch (e) {
       updateWith(isLoading: false);
       rethrow;
@@ -83,6 +94,18 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
     return formType == EmailSignInFormType.signIn
         ? 'Need an account? Register'
         : 'Have an account? Sign in';
+  }
+
+  String get primaryWelcomeText {
+    return formType == EmailSignInFormType.signIn
+        ? 'Welcome back!'
+        : 'Hi there!';
+  }
+
+  String get secondaryWelcomeText {
+    return formType == EmailSignInFormType.signIn
+        ? 'Sign in to your account'
+        : 'Sign up for an account';
   }
 
   bool get canSubmit {

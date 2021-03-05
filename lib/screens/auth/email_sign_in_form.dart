@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:konnect/models/email_sign_in_model.dart';
 import 'package:konnect/sevices/auth.dart';
+import 'package:konnect/utils/colors.dart';
 import 'package:konnect/widgets/platform_alert_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -46,6 +47,8 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
     super.dispose();
   }
 
+  bool _showPass = true;
+
   EmailSignInModel get model => widget.model;
 
   Future<void> _submit() async {
@@ -55,6 +58,18 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
     } on PlatformException catch (e) {
       PlatformAlertDialog(
         title: 'Sign in failed',
+        content: e.message,
+        defaultActionText: 'OK',
+      ).show(context);
+    }
+  }
+
+  Future<void> _sendPassResetMail() async {
+    try {
+      await model.resetPass();
+    } on PlatformException catch (e) {
+      PlatformAlertDialog(
+        title: 'Failed to send Password reset email',
         content: e.message,
         defaultActionText: 'OK',
       ).show(context);
@@ -76,53 +91,182 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
 
   List<Widget> _buildChildren() {
     return [
+      _welcomeText(),
+      SizedBox(height: 30.0),
       _buildEmailTextField(),
       SizedBox(height: 8.0),
       _buildPasswordTextField(),
+      model.formType == EmailSignInFormType.signIn
+          ? _buildForgotPassword()
+          : Padding(padding: const EdgeInsets.all(8.0)),
       SizedBox(height: 8.0),
-      RaisedButton(
+      ElevatedButton(
         onPressed: model.canSubmit ? _submit : null,
-        child: Text(model.primaryButtonText),
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) => kColorPrimary)),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(model.primaryButtonText),
+        ),
       ),
       SizedBox(height: 8.0),
-      FlatButton(
-        child: Text(model.secondaryButtonText),
+      TextButton(
+        child: Text(
+          model.secondaryButtonText,
+          style: Theme.of(context).textTheme.bodyText1,
+        ),
         onPressed: !model.isLoading ? _toggleFormType : null,
       ),
     ];
   }
 
-  TextField _buildPasswordTextField() {
-    return TextField(
-      controller: _passwordController,
-      focusNode: _passwordFocusNode,
-      decoration: InputDecoration(
-        labelText: 'Password',
-        errorText: model.passErrorText,
-        enabled: model.isLoading == false,
-      ),
-      obscureText: true,
-      textInputAction: TextInputAction.done,
-      onChanged: model.updatePassword,
-      onEditingComplete: _submit,
+  Column _welcomeText() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          model.primaryWelcomeText,
+          style: Theme.of(context).textTheme.headline5.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        SizedBox(
+          height: 3.0,
+        ),
+        Text(
+          model.secondaryWelcomeText,
+          style: Theme.of(context)
+              .textTheme
+              .subtitle2
+              .copyWith(color: Colors.grey),
+        ),
+      ],
     );
   }
 
-  TextField _buildEmailTextField() {
-    return TextField(
-      controller: _emailController,
-      focusNode: _emailFocusNode,
-      decoration: InputDecoration(
-        labelText: 'Email',
-        hintText: 'test@test.com',
-        errorText: model.emailErrorText,
-        enabled: model.isLoading == false,
+  Widget _buildEmailTextField() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.grey.shade900,
+          borderRadius: BorderRadius.all(Radius.circular(6.0))),
+      child: Row(
+        children: [
+          Container(
+            width: 100.0,
+            padding: const EdgeInsets.only(left: 15.0, right: 20.0),
+            child: Text(
+              'Email',
+              style: Theme.of(context).textTheme.bodyText2,
+            ),
+          ),
+          Expanded(
+            child: TextField(
+              style: Theme.of(context).textTheme.bodyText2,
+              controller: _emailController,
+              focusNode: _emailFocusNode,
+              decoration: InputDecoration(
+                  hintText: 'example@abc.com',
+                  errorText: model.emailErrorText,
+                  enabled: model.isLoading == false,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade900),
+              autocorrect: false,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              onChanged: model.updateEmail,
+              onEditingComplete: () => _emailEditingComplete(),
+            ),
+          ),
+        ],
       ),
-      autocorrect: false,
-      keyboardType: TextInputType.emailAddress,
-      textInputAction: TextInputAction.next,
-      onChanged: model.updateEmail,
-      onEditingComplete: () => _emailEditingComplete(),
+    );
+  }
+
+  Widget _buildPasswordTextField() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.grey.shade900,
+          borderRadius: BorderRadius.all(Radius.circular(6.0))),
+      child: Row(
+        children: [
+          Container(
+            width: 100.0,
+            padding: const EdgeInsets.only(left: 15.0, right: 20.0),
+            child: Text(
+              'Password',
+              style: Theme.of(context).textTheme.bodyText2,
+            ),
+          ),
+          Expanded(
+            child: TextField(
+              style: Theme.of(context).textTheme.bodyText2,
+              controller: _passwordController,
+              focusNode: _passwordFocusNode,
+              decoration: InputDecoration(
+                suffix: GestureDetector(
+                    child: Icon(
+                      _showPass ? Icons.visibility : Icons.visibility_off,
+                      color: Colors.grey.shade500,
+                    ),
+                    onTap: () {
+                      setState(() {
+                        _showPass = !_showPass;
+                      });
+                    }),
+                hintText: 'At least 6 characters',
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.grey.shade900,
+                errorText: model.passErrorText,
+                enabled: model.isLoading == false,
+              ),
+              obscureText: _showPass,
+              textInputAction: TextInputAction.done,
+              onChanged: model.updatePassword,
+              onEditingComplete: _submit,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildForgotPassword() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          GestureDetector(
+            onTap: _sendPassResetMail,
+            child: Text('Forgot Password?'),
+          ),
+        ],
+      ),
     );
   }
 

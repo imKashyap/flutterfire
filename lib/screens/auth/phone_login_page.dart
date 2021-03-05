@@ -1,153 +1,161 @@
+// import 'package:country_pickers/country.dart';
+// import 'package:country_pickers/country_picker_dropdown.dart';
+// import 'package:country_pickers/utils/utils.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:konnect/screens/auth/otp_page.dart';
+// import 'package:konnect/utils/dimensions.dart';
+// import 'package:konnect/validators/form_validator.dart';
+// import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
 
-import 'package:flutter/material.dart';
+// class PhoneLoginPage extends StatefulWidget with FormValidator {
+//   @override
+//   _PhoneLoginPageState createState() => _PhoneLoginPageState();
+// }
 
+// class _PhoneLoginPageState extends State<PhoneLoginPage> {
+//   final TextEditingController _phoneController = TextEditingController();
+//   bool _isLoading = false;
+//   bool _isSubmitted = false;
+//   String _countryCode = '91';
+//   String initialCountry = 'IN';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key key}) : super(key: key);
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
+//   String get phone => _phoneController.text.trim();
+//   bool get canSubmit {
+//     return widget.phoneValidator.isValid(phone) && !_isLoading;
+//   }
 
-class _LoginPageState extends State<LoginPage> {
-  TextEditingController phoneController = TextEditingController();
+//   String get phoneErrorText {
+//     bool showErrorText = _isSubmitted && !widget.phoneValidator.isValid(phone);
+//     return showErrorText ? widget.phoneError : null;
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-              body: SafeArea(
-                child: SingleChildScrollView(
-                  child: Container(
-                    height: MediaQuery.of(context).size.height,
-                    child: Column(
-                      children: <Widget>[
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            children: <Widget>[
-                              Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                                child: Stack(
-                                  children: <Widget>[
-                                    Center(
-                                      child: Container(
-                                        height: 240,
-                                        constraints: const BoxConstraints(
-                                          maxWidth: 500
-                                        ),
-                                        margin: const EdgeInsets.only(top: 100),
-                                        decoration: const BoxDecoration(color: Color(0xFFE1E0F5), borderRadius: BorderRadius.all(Radius.circular(30))),
-                                      ),
-                                    ),
-                                    Center(
-                                      child: Container(
-                                          constraints: const BoxConstraints(maxHeight: 340),
-                                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                                          child: Image.asset('assets/img/login.png')),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                                  child: Text('TheGorgeousOtp',
-                                      //style: TextStyle(color: MyColors.primaryColor, fontSize: 30, fontWeight: FontWeight.w800)
-                                      ))
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            children: <Widget>[
-                              Container(
-                                  constraints: const BoxConstraints(
-                                      maxWidth: 500
-                                  ),
-                                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                                  child: RichText(
-                                    textAlign: TextAlign.center,
-                                    text: TextSpan(children: <TextSpan>[
-                                      TextSpan(text: 'We will send you an ', style: TextStyle(color: MyColors.primaryColor)),
-                                      TextSpan(
-                                          text: 'One Time Password ',),
-                                      TextSpan(text: 'on this mobile number', style: TextStyle(color: MyColors.primaryColor)),
-                                    ]),
-                                  )),
-                              Container(
-                                height: 40,
-                                constraints: const BoxConstraints(
-                                  maxWidth: 500
-                                ),
-                                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                child: CupertinoTextField(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: const BorderRadius.all(Radius.circular(4))
-                                  ),
-                                  controller: phoneController,
-                                  clearButtonMode: OverlayVisibilityMode.editing,
-                                  keyboardType: TextInputType.phone,
-                                  maxLines: 1,
-                                  placeholder: '+33...',
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                constraints: const BoxConstraints(
-                                    maxWidth: 500
-                                ),
-                                child: RaisedButton(
-                                  onPressed: () {
-                                    if (phoneController.text.isNotEmpty) {
-                                      loginStore.getCodeWithPhoneNumber(context, phoneController.text.toString());
-                                    } else {
-                                      loginStore.loginScaffoldKey.currentState.showSnackBar(SnackBar(
-                                        behavior: SnackBarBehavior.floating,
-                                        backgroundColor: Colors.red,
-                                        content: Text(
-                                          'Please enter a phone number',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ));
-                                    }
-                                  },
-                                  color: MyColors.primaryColor,
-                                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(14))),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Text(
-                                          'Next',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            borderRadius: const BorderRadius.all(Radius.circular(20)),
-                                            color: MyColors.primaryColorLight,
-                                          ),
-                                          child: Icon(
-                                            Icons.arrow_forward_ios,
-                                            color: Colors.white,
-                                            size: 16,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-  }
-}
+//   Dimensions myDim;
+//   @override
+//   Widget build(BuildContext context) {
+//     myDim = Dimensions(context);
+//     return Scaffold(
+//       body: SafeArea(
+//         child: Padding(
+//           padding: EdgeInsets.symmetric(horizontal: myDim.width * 0.08),
+//           child: SingleChildScrollView(
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//               children: _buildChildren(),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   List<Widget> _buildChildren() {
+//     double totalHeight = myDim.height - myDim.statusBarHeight;
+//     return [
+//       Text(
+//         'Enter phone number',
+//         style: Theme.of(context)
+//             .textTheme
+//             .headline5
+//             .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+//       ),
+//       Row(
+//         children: <Widget>[
+//           CountryPickerDropdown(
+//             initialValue: 'in',
+//             itemBuilder: _buildDropdownItem,
+//             onValuePicked: (Country country) {
+//               // print("${country.name}");
+//             },
+//           ),
+//           Expanded(
+//             child: TextField(
+//               controller: _phoneController,
+//               keyboardType: TextInputType.phone,
+//               decoration: InputDecoration(
+//                 border: InputBorder.none,
+//                 hintText: "Phone Number",
+//               ),
+//               onChanged: (value) {
+//                 // this.phoneNo=value;
+//                 // print(value);
+//               },
+//             ),
+//           ),
+//         ],
+//       ),
+//       Container(
+//         alignment: Alignment.center,
+//         height: totalHeight * 0.15,
+//         child: RaisedButton(
+//           onPressed: _isLoading ? null : _submit,
+//           child: _isLoading
+//               ? SizedBox(
+//                   child: CircularProgressIndicator(
+//                     //valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+//                     strokeWidth: 2.0,
+//                   ),
+//                   height: 25.0,
+//                   width: 25.0,
+//                 )
+//               : Text(
+//                   'Next',
+//                   textScaleFactor: myDim.textScaleFactor,
+//                   style: TextStyle(
+//                       color: Colors.white, fontSize: myDim.width * 0.05),
+//                 ),
+//         ),
+//       )
+//     ];
+//   }
+
+//   Widget _buildDropdownItem(Country country) => Container(
+//         child: Row(
+//           children: <Widget>[
+//             CountryPickerUtils.getDefaultFlagImage(country),
+//             SizedBox(
+//               width: 8.0,
+//             ),
+//             Text("+${country.phoneCode}"),
+//           ],
+//         ),
+//       );
+
+//   void _submit() async {
+//     setState(() {
+//       _isSubmitted = true;
+//     });
+//     if (!canSubmit) return;
+//     setState(() {
+//       _isLoading = true;
+//     });
+//     try {
+//       // final sessionId = await Provider.of<AuthHandler>(context, listen: false)
+//       //     .generateOtp('+' + _countryCode + phone);
+//       // ToastWidget(context).showToast('OTP Sent');
+//       setState(() {
+//         _isLoading = false;
+//       });
+//       Navigator.of(context).push(MaterialPageRoute(
+//           builder: (ctx) => OtpPage(
+//                 phoneNo: '+' + _countryCode + phone,
+//                 sessionId: 'sessionId',
+//               )));
+//     } on PlatformException catch (e) {
+//       setState(() {
+//         _isLoading = false;
+//       });
+//       showErrorDialog(e);
+//     }
+//   }
+
+//   void showErrorDialog(PlatformException e) {
+//     PlatfromrExceptionAlertDialog(title: 'Sign In Failed', e: e).show(context);
+//   }
+
+//   @override
+//   void dispose() {
+//     super.dispose();
+//     _phoneController.dispose();
+//   }
+// }

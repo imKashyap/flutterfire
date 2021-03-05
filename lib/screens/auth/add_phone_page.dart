@@ -1,6 +1,3 @@
-import 'package:country_pickers/country.dart';
-import 'package:country_pickers/country_picker_dropdown.dart';
-import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +22,7 @@ class _AddPhonePageState extends State<AddPhonePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
         body: SafeArea(
           child: Padding(
@@ -43,13 +40,6 @@ class _AddPhonePageState extends State<AddPhonePage> {
                 ),
                 Row(
                   children: <Widget>[
-                    CountryPickerDropdown(
-                      initialValue: 'in',
-                      itemBuilder: _buildDropdownItem,
-                      onValuePicked: (Country country) {
-                        // print("${country.name}");
-                      },
-                    ),
                     Expanded(
                       child: TextField(
                         controller: _phoneNumberController,
@@ -79,8 +69,9 @@ class _AddPhonePageState extends State<AddPhonePage> {
                 Container(
                   padding: const EdgeInsets.only(top: 16.0),
                   alignment: Alignment.center,
-                  child: RaisedButton(
-                      color: Colors.greenAccent[200],
+                  child: ElevatedButton(
+                      style: ButtonStyle(),
+                      // color: Colors.greenAccent[200],
                       onPressed: () async {
                         signInWithPhoneNumber();
                       },
@@ -92,20 +83,8 @@ class _AddPhonePageState extends State<AddPhonePage> {
         ));
   }
 
-  Widget _buildDropdownItem(Country country) => Container(
-        child: Row(
-          children: <Widget>[
-            CountryPickerUtils.getDefaultFlagImage(country),
-            SizedBox(
-              width: 8.0,
-            ),
-            Text("+${country.phoneCode}"),
-          ],
-        ),
-      );
-
   Widget _buildSubmitButton() {
-    return RaisedButton(
+    return ElevatedButton(
       onPressed: () async {
         verifyPhoneNumber();
       },
@@ -138,14 +117,14 @@ class _AddPhonePageState extends State<AddPhonePage> {
     };
     try {
       await _auth.verifyPhoneNumber(
-          phoneNumber: "+91"+_phoneNumberController.text,
+          phoneNumber: "+91" + _phoneNumberController.text,
           timeout: const Duration(seconds: 60),
           verificationCompleted: verificationCompleted,
           verificationFailed: verificationFailed,
           codeSent: codeSent,
           codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
     } catch (e) {
-      showSnackbar("Failed to Verify Phone Number: ${e}");
+      showSnackbar("Failed to Verify Phone Number: $e");
     }
   }
 

@@ -123,10 +123,6 @@ class _AuthPageState extends State<AuthPage> {
             text: 'Continue with Facebook',
             onPressed: () => _isLoading ? null : _signInWithFb(),
           ),
-          // buildSocialLoginButton(context, icon: null, text: 'Log in',
-          //     onPressed: () {
-          //   print('Pressed');
-          // }),
         ],
       ),
     );
