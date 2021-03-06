@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/models/email_sign_in_model.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
@@ -12,10 +13,11 @@ class EmailSignInForm extends StatefulWidget {
   final EmailSignInModel model;
 
   static Widget create(BuildContext context, bool toLink, String previousEmail,
-      AuthCredential creds) {
+      AuthCredential creds, User user) {
     final auth = Provider.of<AuthBase>(context);
     return ChangeNotifierProvider<EmailSignInModel>(
       create: (_) => EmailSignInModel(
+          user: user,
           auth: auth,
           toLink: toLink,
           creds: creds,

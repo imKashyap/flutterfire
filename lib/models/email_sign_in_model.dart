@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/validators/form_validator.dart';
 
@@ -11,6 +12,7 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
   bool isLoading;
   EmailSignInFormType formType;
   bool isSubmitted;
+  User user;
   final bool toLink;
   final String previousEmail;
   final AuthCredential creds;
@@ -19,6 +21,7 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
   EmailSignInModel({
     @required this.auth,
     @required this.creds,
+    @required this.user,
     this.email = '',
     this.password = '',
     this.formType = EmailSignInFormType.signIn,
@@ -48,7 +51,7 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
         await auth.loginWithEmail(
             email, password, toLink, previousEmail, creds);
       } else {
-        await auth.signUpWithEmail(email, password);
+        await auth.signUpWithEmail(email, password, toLink, user);
       }
     } catch (e) {
       updateWith(isLoading: false);
@@ -59,7 +62,7 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
   Future<void> resetPass() async {
     updateWith(isSubmitted: true, isLoading: true);
     try {
-        await auth.sendPasswordResetEmail(email);
+      await auth.sendPasswordResetEmail(email);
     } catch (e) {
       updateWith(isLoading: false);
       rethrow;

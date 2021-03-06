@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:international_phone_input/international_phone_input.dart';
+import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/sevices/phone_auth_model.dart';
 import '../../utils/colors.dart';
 import '../../utils/dimensions.dart';
-import 'otp_page.dart';
+import 'otp_page_ui.dart';
 
 class PhoneLoginUI extends StatefulWidget {
   final PhoneAuthModel model;
@@ -148,7 +150,11 @@ class _PhoneLOginUIState extends State<PhoneLoginUI> {
       _isLoading = true;
     });
     try {
-      await model.verifyPhoneNumber();
+      User isNewUser=await model.verifyPhoneNumber();
+      if(isNewUser!=null)Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (context) => EmailSignInManager(toLink: true,user: isNewUser,)),
+            (Route<dynamic> route) => false);
     } catch (e) {
       print("error " + e.message);
     }
@@ -157,7 +163,7 @@ class _PhoneLOginUIState extends State<PhoneLoginUI> {
     });
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (ctx) => OtpPage(
+        builder: (ctx) => OtpPageUI(
           model: model,
         ),
       ),

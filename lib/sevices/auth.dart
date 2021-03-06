@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/models/konnector.dart';
 
 abstract class AuthBase {
@@ -11,7 +12,8 @@ abstract class AuthBase {
   User getCurrentUser();
   Future<User> signInWithGoogle(bool toLink,
       [String previousEmail, AuthCredential creds]);
-  Future<User> signUpWithEmail(String email, String password);
+  Future<User> signUpWithEmail(String email, String password, bool toLink,
+      [User user]);
   Future<User> loginWithEmail(String email, String password, bool toLink,
       [String previousEmail, AuthCredential creds]);
   Future<User> signInWithFb();
@@ -41,12 +43,13 @@ class Auth implements AuthBase {
   }
 
   @override
-  Future<User> signUpWithEmail(String email, String password) async {
+  Future<User> signUpWithEmail(String email, String password, bool toLink,
+      [User user]) async {
     UserCredential userCreds = await _auth.createUserWithEmailAndPassword(
         email: email, password: password);
-    User user = userCreds.user;
     try {
       await user.sendEmailVerification();
+      if (toLink) await user.linkWithCredential(userCreds.credential);
       await signOut();
       return null;
     } catch (e) {
@@ -90,7 +93,6 @@ class Auth implements AuthBase {
   @override
   Future<User> signInWithGoogle(bool toLink,
       [String previousEmail, AuthCredential creds]) async {
-        
     final GoogleSignInAccount googleSignInAccount =
         await _googleSignIn.signIn();
     if (googleSignInAccount != null) {
@@ -181,23 +183,4 @@ class Auth implements AuthBase {
   Future<void> sendPasswordResetEmail(String email) async {
     return _auth.sendPasswordResetEmail(email: email);
   }
-
-  // @override
-  // Future<User> signInWithPhoneNumber(
-  //     {String verificationId, String smsCode}) async {
-  //   try {
-  //     final AuthCredential credential = PhoneAuthProvider.credential(
-  //       verificationId: verificationId,
-  //       smsCode: smsCode,
-  //     );
-
-  //     final User user = (await _auth.signInWithCredential(credential)).user;
-  //     return user;
-  //     widget.userToLink.linkWithCredential(credential);
-
-  //     showSnackbar("Successfully signed in UID: ${user.uid}");
-  //   } catch (e) {
-  //     showSnackbar("Failed to sign in: " + e.toString());
-  //   }
-  // }
 }

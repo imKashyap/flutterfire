@@ -43,13 +43,17 @@ class PhoneAuthModel with FormValidator, ChangeNotifier {
     return showErrorText ? phoneError : null;
   }
 
-  Future<void> verifyPhoneNumber() async {
+  Future<User> verifyPhoneNumber() async {
     PhoneVerificationCompleted verificationCompleted =
         type == PhoneAuthType.login
             ? (PhoneAuthCredential phoneAuthCredential) async {
-                await auth.signInWithCredential(phoneAuthCredential);
+                UserCredential userCreds =
+                    await auth.signInWithCredential(phoneAuthCredential);
                 print(
                     "Phone number automatically verified and user signed in: ${auth.currentUser.uid}");
+                int index = userCreds.user.providerData
+                    .indexWhere((info) => info.providerId == 'password');
+                return index == -1 ? userCreds.user : null;
               }
             : (PhoneAuthCredential phoneAuthCredential) async {
                 await userToLink.linkWithCredential(phoneAuthCredential);
@@ -82,29 +86,31 @@ class PhoneAuthModel with FormValidator, ChangeNotifier {
           verificationFailed: verificationFailed,
           codeSent: codeSent,
           codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
+      return null;
     } catch (e) {
       print("Failed to Verify Phone Number: $e");
       rethrow;
     }
   }
 
-  Future<void> signInWithPhoneNumber() async {
+  Future<User> signInWithPhoneNumber() async {
     try {
       final AuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verId,
         smsCode: otp,
       );
-      type == PhoneAuthType.login
-          ? await auth.signInWithCredential(credential)
-          : await userToLink.linkWithCredential(credential);
-      //
+      if (type == PhoneAuthType.login) {
+        UserCredential userCreds = await auth.signInWithCredential(credential);
+        int index = userCreds.user.providerData
+            .indexWhere((info) => info.providerId == 'password');
+        return index == -1 ? userCreds.user : null;
+      } else {
+        await userToLink.linkWithCredential(credential);
+        return null;
+      }
     } catch (e) {
       print("Failed to sign in: " + e.toString());
       rethrow;
     }
   }
-
-  // Future<void> checkUser(UserCredential userCreds){
-  //   if(userCreds.additionalUserInfo.isNewUser)
-  // }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:konnect/sevices/phone_auth_model.dart';
 import 'package:provider/provider.dart';
 
-import 'phone_login_ui.dart';
+import '../misc/phone_login_ui.dart';
 
 class PhoneLoginPage extends StatelessWidget {
   PhoneLoginPage({@required this.model});

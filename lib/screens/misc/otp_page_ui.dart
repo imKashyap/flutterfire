@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/sevices/phone_auth_model.dart';
 import 'package:konnect/utils/dimensions.dart';
 import 'package:konnect/validators/form_validator.dart';
@@ -10,18 +12,18 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../utils/colors.dart';
 import '../register/register_page.dart';
 
-class OtpPage extends StatefulWidget with FormValidator {
+class OtpPageUI extends StatefulWidget with FormValidator {
   final PhoneAuthModel model;
-  OtpPage({
+  OtpPageUI({
     Key key,
     @required this.model,
   }) : super(key: key);
 
   @override
-  _OtpPageState createState() => _OtpPageState();
+  _OtpPageUIState createState() => _OtpPageUIState();
 }
 
-class _OtpPageState extends State<OtpPage> {
+class _OtpPageUIState extends State<OtpPageUI> {
   // ToastWidget _toast;
   @override
   void initState() {
@@ -295,11 +297,19 @@ class _OtpPageState extends State<OtpPage> {
         _isLoading = true;
       });
       try {
-        await model.signInWithPhoneNumber();
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (context) => RegisterPage(model.userToLink)),
-            (Route<dynamic> route) => false);
+        User isNewUser = await model.signInWithPhoneNumber();
+        isNewUser != null
+            ? Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (context) => EmailSignInManager(
+                          toLink: true,
+                          user: isNewUser,
+                        )),
+                (Route<dynamic> route) => false)
+            : Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (context) => RegisterPage(model.userToLink)),
+                (Route<dynamic> route) => false);
       } catch (e) {
         print("error " + e.message);
       }

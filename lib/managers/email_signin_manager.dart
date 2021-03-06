@@ -6,8 +6,14 @@ class EmailSignInManager extends StatelessWidget {
   final bool toLink;
   final String previousEmail;
   final AuthCredential creds;
+  final User user;
 
-  const EmailSignInManager({this.toLink, this.previousEmail, this.creds});
+  const EmailSignInManager({
+    this.toLink,
+    this.previousEmail,
+    this.creds,
+    this.user,
+  });
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,7 +23,13 @@ class EmailSignInManager extends StatelessWidget {
         title: Text('Sign In'),
       ),
       body: SingleChildScrollView(
-        child: EmailSignInForm.create(context, toLink, previousEmail, creds),
+        child: EmailSignInForm.create(
+          context,
+          toLink,
+          previousEmail,
+          creds,
+          user,
+        ),
       ),
     );
   }

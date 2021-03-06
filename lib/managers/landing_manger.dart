@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:konnect/screens/auth/add_phone_page.dart';
 import 'package:konnect/screens/auth/auth_page.dart';
 import 'package:konnect/screens/chat/home_page.dart';
-import 'package:konnect/screens/loading_page.dart';
+import 'package:konnect/screens/misc/loading_page.dart';
 import 'package:konnect/screens/register/register_page.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:provider/provider.dart';
