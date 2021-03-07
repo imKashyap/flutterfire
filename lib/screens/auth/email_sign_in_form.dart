@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:konnect/managers/email_signin_manager.dart';
+import 'package:konnect/managers/landing_manger.dart';
 import 'package:konnect/models/email_sign_in_model.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
@@ -13,15 +13,16 @@ class EmailSignInForm extends StatefulWidget {
   final EmailSignInModel model;
 
   static Widget create(BuildContext context, bool toLink, String previousEmail,
-      AuthCredential creds, User user) {
+      AuthCredential creds, EmailSignInFormType type, LinkType linkType) {
     final auth = Provider.of<AuthBase>(context);
     return ChangeNotifierProvider<EmailSignInModel>(
       create: (_) => EmailSignInModel(
-          user: user,
+          linkType: linkType,
           auth: auth,
           toLink: toLink,
           creds: creds,
-          previousEmail: previousEmail),
+          previousEmail: previousEmail,
+          formType: type),
       child: Consumer<EmailSignInModel>(
         builder: (context, model, _) => EmailSignInForm(
           model: model,
@@ -55,8 +56,13 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
 
   Future<void> _submit() async {
     try {
+      model.updateLinkingStatus();
       await model.submit();
-      Navigator.of(context).pop();
+      if (model.toPop())
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (ctx) => LandingManager()));
+      else
+        _toggleFormType();
     } on PlatformException catch (e) {
       PlatformAlertDialog(
         title: 'Sign in failed',
@@ -77,6 +83,7 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
       ).show(context);
     }
   }
+
 
   void _emailEditingComplete() {
     final newFocus = model.emailValidator.isValid(model.email)

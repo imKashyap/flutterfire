@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../validators/form_validator.dart';
 
 enum PhoneAuthType { login, register }
@@ -43,17 +44,17 @@ class PhoneAuthModel with FormValidator, ChangeNotifier {
     return showErrorText ? phoneError : null;
   }
 
-  Future<User> verifyPhoneNumber() async {
+  Future<AuthCredential> verifyPhoneNumber() async {
     PhoneVerificationCompleted verificationCompleted =
         type == PhoneAuthType.login
             ? (PhoneAuthCredential phoneAuthCredential) async {
-                UserCredential userCreds =
-                    await auth.signInWithCredential(phoneAuthCredential);
-                print(
-                    "Phone number automatically verified and user signed in: ${auth.currentUser.uid}");
-                int index = userCreds.user.providerData
-                    .indexWhere((info) => info.providerId == 'password');
-                return index == -1 ? userCreds.user : null;
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                if (prefs.getString('user') != null) {
+                  await auth.signInWithCredential(phoneAuthCredential);
+                  print(
+                      "Phone number automatically verified and user signed in: ${auth.currentUser.uid}");
+                } else
+                  return phoneAuthCredential;
               }
             : (PhoneAuthCredential phoneAuthCredential) async {
                 await userToLink.linkWithCredential(phoneAuthCredential);
@@ -93,21 +94,20 @@ class PhoneAuthModel with FormValidator, ChangeNotifier {
     }
   }
 
-  Future<User> signInWithPhoneNumber() async {
+  Future<AuthCredential> signInWithPhoneNumber() async {
     try {
       final AuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verId,
         smsCode: otp,
       );
-      if (type == PhoneAuthType.login) {
-        UserCredential userCreds = await auth.signInWithCredential(credential);
-        int index = userCreds.user.providerData
-            .indexWhere((info) => info.providerId == 'password');
-        return index == -1 ? userCreds.user : null;
-      } else {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (prefs.getString('user') != null) {
         await userToLink.linkWithCredential(credential);
+        print(
+            "Phone number verified and user signed in: ${auth.currentUser.uid}");
         return null;
-      }
+      } else
+        return credential;
     } catch (e) {
       print("Failed to sign in: " + e.toString());
       rethrow;

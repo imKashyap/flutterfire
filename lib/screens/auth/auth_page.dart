@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:konnect/managers/email_signin_manager.dart';
+import 'package:konnect/models/email_sign_in_model.dart';
+import 'package:konnect/screens/auth/email_sign_in_form.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
 import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
@@ -229,7 +231,9 @@ class _AuthPageState extends State<AuthPage> {
         MaterialPageRoute(
             fullscreenDialog: true,
             builder: (context) => EmailSignInManager(
+                  type: EmailSignInFormType.signIn,
                   toLink: _toLinkFb,
+                  linkType: LinkType.fb,
                   previousEmail: _emailToLink,
                   creds: _credsToLink,
                 )));

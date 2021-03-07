@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:konnect/managers/landing_manger.dart';
 import 'package:konnect/models/konnector.dart';
+import 'package:konnect/screens/auth/auth_page.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +33,9 @@ class MyApp extends StatelessWidget {
           fontFamily: 'GoogleSans',
         ),
         home: LandingManager(),
+        routes: {
+          '\main': (ctx) => LandingManager(),
+        },
       ),
     );
   }

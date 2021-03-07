@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:konnect/managers/email_signin_manager.dart';
+import 'package:konnect/models/email_sign_in_model.dart';
 import 'package:konnect/sevices/phone_auth_model.dart';
 import 'package:konnect/utils/dimensions.dart';
 import 'package:konnect/validators/form_validator.dart';
@@ -138,7 +139,6 @@ class _OtpPageUIState extends State<OtpPageUI> {
               ),
             ),
           ),
-          // borderSide: BorderSide(color: kColorPrimary),
           onPressed: _isLoading || _isResending
               ? null
               : () {
@@ -297,19 +297,21 @@ class _OtpPageUIState extends State<OtpPageUI> {
         _isLoading = true;
       });
       try {
-        User isNewUser = await model.signInWithPhoneNumber();
-        isNewUser != null
+        AuthCredential creds = await model.signInWithPhoneNumber();
+        creds != null
             ? Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(
                     builder: (context) => EmailSignInManager(
+                          type: EmailSignInFormType.signUp,
                           toLink: true,
-                          user: isNewUser,
+                          creds: creds,
+                          linkType:LinkType.phone
                         )),
                 (Route<dynamic> route) => false)
             : Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(
                     builder: (context) => RegisterPage(model.userToLink)),
-                (Route<dynamic> route) => false);
+                ModalRoute.withName('\main'));
       } catch (e) {
         print("error " + e.message);
       }

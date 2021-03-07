@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:international_phone_input/international_phone_input.dart';
 import 'package:konnect/managers/email_signin_manager.dart';
+import 'package:konnect/models/email_sign_in_model.dart';
 import 'package:konnect/sevices/phone_auth_model.dart';
 import '../../utils/colors.dart';
 import '../../utils/dimensions.dart';
@@ -150,11 +151,17 @@ class _PhoneLOginUIState extends State<PhoneLoginUI> {
       _isLoading = true;
     });
     try {
-      User isNewUser=await model.verifyPhoneNumber();
-      if(isNewUser!=null)Navigator.of(context).pushAndRemoveUntil(
+      AuthCredential creds = await model.verifyPhoneNumber();
+      if (creds != null)
+        Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-                builder: (context) => EmailSignInManager(toLink: true,user: isNewUser,)),
-            (Route<dynamic> route) => false);
+                builder: (context) => EmailSignInManager(
+                      linkType: LinkType.phone,
+                      type: EmailSignInFormType.signUp,
+                      toLink: true,
+                      creds: creds,
+                    )),
+            ModalRoute.withName('\main'));
     } catch (e) {
       print("error " + e.message);
     }

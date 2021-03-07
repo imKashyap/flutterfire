@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/validators/form_validator.dart';
 
 enum EmailSignInFormType { signIn, signUp }
+enum LinkType { phone, fb }
 
 class EmailSignInModel with FormValidator, ChangeNotifier {
   String email;
@@ -12,22 +12,22 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
   bool isLoading;
   EmailSignInFormType formType;
   bool isSubmitted;
-  User user;
-  final bool toLink;
+  bool toLink;
   final String previousEmail;
   final AuthCredential creds;
   final AuthBase auth;
+  LinkType linkType;
 
   EmailSignInModel({
+    @required this.linkType,
     @required this.auth,
     @required this.creds,
-    @required this.user,
+    @required this.formType,
+    @required this.previousEmail,
+    @required this.toLink,
     this.email = '',
     this.password = '',
-    this.formType = EmailSignInFormType.signIn,
     this.isLoading = false,
-    @required this.toLink,
-    @required this.previousEmail,
     this.isSubmitted = false,
   });
 
@@ -45,18 +45,25 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
   }
 
   Future<void> submit() async {
+    check();
     updateWith(isSubmitted: true, isLoading: true);
     try {
       if (formType == EmailSignInFormType.signIn) {
         await auth.loginWithEmail(
             email, password, toLink, previousEmail, creds);
       } else {
-        await auth.signUpWithEmail(email, password, toLink, user);
+        await auth.signUpWithEmail(email, password, toLink, creds);
       }
     } catch (e) {
       updateWith(isLoading: false);
       rethrow;
     }
+  }
+
+  void check() {
+    print("to link: " + toLink.toString());
+    print("link type: " + linkType.toString());
+    print("form type: " + formType.toString());
   }
 
   Future<void> resetPass() async {
@@ -69,6 +76,15 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
     }
   }
 
+  void updateLinkingStatus() {
+    if (this.linkType == LinkType.phone &&
+        this.formType == EmailSignInFormType.signIn) updateWith(toLink: false);
+  }
+
+  bool toPop() {
+    return formType == EmailSignInFormType.signIn;
+  }
+
   void updateEmail(String email) => updateWith(email: email);
 
   void updatePassword(String password) => updateWith(password: password);
@@ -77,6 +93,7 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
       {String email,
       String password,
       EmailSignInFormType formType,
+      bool toLink,
       bool isLoading,
       bool isSubmitted}) {
     this.email = email ?? this.email;
@@ -84,6 +101,7 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
     this.formType = formType ?? this.formType;
     this.isLoading = isLoading ?? this.isLoading;
     this.isSubmitted = isSubmitted ?? this.isSubmitted;
+    this.toLink = toLink ?? this.toLink;
     notifyListeners();
   }
 

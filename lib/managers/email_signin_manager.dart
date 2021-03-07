@@ -1,18 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:konnect/models/email_sign_in_model.dart';
 import 'package:konnect/screens/auth/email_sign_in_form.dart';
 
 class EmailSignInManager extends StatelessWidget {
-  final bool toLink;
+  bool toLink;
   final String previousEmail;
   final AuthCredential creds;
-  final User user;
+  EmailSignInFormType type;
+  LinkType linkType;
 
-  const EmailSignInManager({
+  EmailSignInManager({
     this.toLink,
     this.previousEmail,
     this.creds,
-    this.user,
+    @required this.linkType,
+    @required this.type,
   });
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,8 @@ class EmailSignInManager extends StatelessWidget {
           toLink,
           previousEmail,
           creds,
-          user,
+          type,
+          linkType,
         ),
       ),
     );

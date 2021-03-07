@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/models/konnector.dart';
 
 abstract class AuthBase {
@@ -13,13 +13,12 @@ abstract class AuthBase {
   Future<User> signInWithGoogle(bool toLink,
       [String previousEmail, AuthCredential creds]);
   Future<User> signUpWithEmail(String email, String password, bool toLink,
-      [User user]);
+      [AuthCredential creds]);
   Future<User> loginWithEmail(String email, String password, bool toLink,
       [String previousEmail, AuthCredential creds]);
   Future<User> signInWithFb();
   Future<void> signOut();
   Future<void> sendPasswordResetEmail(String email);
-  //Future<User> signInWithPhoneNumber({String verificationId, String smsCode});
 }
 
 class Auth implements AuthBase {
@@ -44,12 +43,18 @@ class Auth implements AuthBase {
 
   @override
   Future<User> signUpWithEmail(String email, String password, bool toLink,
-      [User user]) async {
-    UserCredential userCreds = await _auth.createUserWithEmailAndPassword(
-        email: email, password: password);
+      [AuthCredential creds]) async {
     try {
-      await user.sendEmailVerification();
-      if (toLink) await user.linkWithCredential(userCreds.credential);
+      UserCredential userCreds = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      await userCreds.user.sendEmailVerification();
+      if (toLink) {
+        try {
+          userCreds.user.linkWithCredential(creds);
+        } catch (e) {
+          throw PlatformException(code: e.code, message: e.message);
+        }
+      }
       await signOut();
       return null;
     } catch (e) {
@@ -61,7 +66,7 @@ class Auth implements AuthBase {
 
   @override
   Future<User> loginWithEmail(String email, String password, bool toLink,
-      [String previousEmail, AuthCredential creds]) async {
+      [String previousEmail, AuthCredential creds, String phoneNo]) async {
     UserCredential userCreds = await _auth.signInWithEmailAndPassword(
         email: email, password: password);
     if (!toLink) {
