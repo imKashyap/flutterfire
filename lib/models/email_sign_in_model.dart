@@ -45,7 +45,6 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
   }
 
   Future<void> submit() async {
-    check();
     updateWith(isSubmitted: true, isLoading: true);
     try {
       if (formType == EmailSignInFormType.signIn) {
@@ -60,19 +59,14 @@ class EmailSignInModel with FormValidator, ChangeNotifier {
     }
   }
 
-  void check() {
-    print("to link: " + toLink.toString());
-    print("link type: " + linkType.toString());
-    print("form type: " + formType.toString());
-  }
-
   Future<void> resetPass() async {
     updateWith(isSubmitted: true, isLoading: true);
     try {
       await auth.sendPasswordResetEmail(email);
     } catch (e) {
-      updateWith(isLoading: false);
       rethrow;
+    } finally {
+      updateWith(isSubmitted: false, isLoading: false);
     }
   }
 

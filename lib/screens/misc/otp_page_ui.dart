@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/models/email_sign_in_model.dart';
-import 'package:konnect/sevices/phone_auth_model.dart';
+import 'package:konnect/screens/chat/home_page.dart';
+import 'package:konnect/models/phone_auth_model.dart';
 import 'package:konnect/utils/dimensions.dart';
 import 'package:konnect/validators/form_validator.dart';
 import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/colors.dart';
 import '../register/register_page.dart';
 
@@ -45,10 +47,8 @@ class _OtpPageUIState extends State<OtpPageUI> {
   }
 
   TextEditingController textEditingController = TextEditingController();
-  // ..text = "123456";
 
   StreamController<ErrorAnimationType> errorController;
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   Dimensions myDim;
   @override
@@ -66,7 +66,7 @@ class _OtpPageUIState extends State<OtpPageUI> {
         body: SafeArea(
             child: Padding(
           padding: EdgeInsets.symmetric(
-              horizontal: myDim.width * 0.04, vertical: myDim.height * 0.01),
+              horizontal: myDim.width * 0.06, vertical: myDim.height * 0.01),
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: _buildChildren()),
@@ -122,7 +122,6 @@ class _OtpPageUIState extends State<OtpPageUI> {
                       ),
                 )),
       spacebox,
-      spacebox,
       Container(
         height: myDim.height * 0.07,
         width: double.maxFinite,
@@ -131,13 +130,13 @@ class _OtpPageUIState extends State<OtpPageUI> {
             side: MaterialStateProperty.resolveWith<BorderSide>(
                 (Set<MaterialState> states) =>
                     BorderSide(color: kColorPrimary)),
-            shape: MaterialStateProperty.resolveWith<OutlinedBorder>(
-              (Set<MaterialState> states) => RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(40.0),
-                ),
-              ),
-            ),
+            // shape: MaterialStateProperty.resolveWith<OutlinedBorder>(
+            //   (Set<MaterialState> states) => RoundedRectangleBorder(
+            //     borderRadius: BorderRadius.all(
+            //       Radius.circular(40.0),
+            //     ),
+            //   ),
+            // ),
           ),
           onPressed: _isLoading || _isResending
               ? null
@@ -298,22 +297,29 @@ class _OtpPageUIState extends State<OtpPageUI> {
       });
       try {
         AuthCredential creds = await model.signInWithPhoneNumber();
-        creds != null
-            ? Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                    builder: (context) => EmailSignInManager(
-                          type: EmailSignInFormType.signUp,
-                          toLink: true,
-                          creds: creds,
-                          linkType:LinkType.phone
-                        )),
-                (Route<dynamic> route) => false)
-            : Navigator.of(context).pushAndRemoveUntil(
+        if (creds != null)
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (context) => EmailSignInManager(
+                      type: EmailSignInFormType.signUp,
+                      toLink: true,
+                      creds: creds,
+                      linkType: LinkType.phone)),
+              (Route<dynamic> route) => false);
+        else {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          if (prefs.getString('user') != null)
+            Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => HomePage()),
+                ModalRoute.withName('\main'));
+          else
+            Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(
                     builder: (context) => RegisterPage(model.userToLink)),
                 ModalRoute.withName('\main'));
-      } catch (e) {
-        print("error " + e.message);
+        }
+      } on PlatformException catch (e) {
+        showErrorDialog(e);
       }
       _timer.cancel();
       setState(() {
@@ -323,18 +329,12 @@ class _OtpPageUIState extends State<OtpPageUI> {
   }
 
   Future<void> _resendOtp() async {
+    setState(() {
+      _isResending = true;
+      _startTimer();
+    });
     try {
-      setState(() {
-        _isResending = true;
-      });
-      setState(() {
-        _startTimer();
-      });
-      try {
-        await model.verifyPhoneNumber();
-      } catch (e) {
-        print("error " + e.message);
-      }
+      await model.verifyPhoneNumber();
     } on PlatformException catch (e) {
       showErrorDialog(e);
     } finally {
@@ -353,5 +353,6 @@ class _OtpPageUIState extends State<OtpPageUI> {
   void dispose() {
     super.dispose();
     errorController.close();
+    //textEditingController.dispose();
   }
 }

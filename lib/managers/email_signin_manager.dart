@@ -4,13 +4,13 @@ import 'package:konnect/models/email_sign_in_model.dart';
 import 'package:konnect/screens/auth/email_sign_in_form.dart';
 
 class EmailSignInManager extends StatelessWidget {
-  bool toLink;
+  final bool toLink;
   final String previousEmail;
   final AuthCredential creds;
-  EmailSignInFormType type;
-  LinkType linkType;
+  final EmailSignInFormType type;
+  final  LinkType linkType;
 
-  EmailSignInManager({
+  const EmailSignInManager({
     this.toLink,
     this.previousEmail,
     this.creds,

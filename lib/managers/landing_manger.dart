@@ -32,7 +32,7 @@ class LandingManager extends StatelessWidget {
                     builder: (BuildContext context,
                         AsyncSnapshot<SharedPreferences> prefs) {
                       if (prefs.connectionState == ConnectionState.done) {
-                        if (prefs.data.getBool('isRegistered') != null)
+                        if (prefs.data.getBool('user') != null)
                           return HomePage();
                         else
                           return RegisterPage(snapshot.data);

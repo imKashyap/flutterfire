@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:konnect/models/konnector.dart';
 
 abstract class AuthBase {
   Stream<User> getCurrentAuthState();
@@ -26,10 +24,10 @@ class Auth implements AuthBase {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final _fbLogin = FacebookLogin();
 
-  Konnector _getUserFromFirebase(User user) {
-    if (user == null) return null;
-    return Konnector(user: user);
-  }
+  // Konnector _getUserFromFirebase(User user) {
+  //   if (user == null) return null;
+  //   return Konnector(user: user);
+  // }
 
   @override
   Stream<User> getCurrentAuthState() {
@@ -48,51 +46,56 @@ class Auth implements AuthBase {
       UserCredential userCreds = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       await userCreds.user.sendEmailVerification();
-      if (toLink) {
-        try {
-          userCreds.user.linkWithCredential(creds);
-        } catch (e) {
-          throw PlatformException(code: e.code, message: e.message);
-        }
-      }
+      if (toLink) userCreds.user.linkWithCredential(creds);
       await signOut();
       return null;
     } catch (e) {
-      print("An error occured while trying to send verification email");
-      print(e.message);
-      rethrow;
+      throw PlatformException(code: e.code, message: e.message);
     }
   }
 
   @override
   Future<User> loginWithEmail(String email, String password, bool toLink,
       [String previousEmail, AuthCredential creds, String phoneNo]) async {
-    UserCredential userCreds = await _auth.signInWithEmailAndPassword(
-        email: email, password: password);
-    if (!toLink) {
-      final user = userCreds.user;
-      if (user.emailVerified)
-        return userCreds.user;
-      else {
-        try {
-          await user.delete();
-          throw PlatformException(
-              code: 'ERROR_USER_NOT_FOUND',
-              message:
-                  'Your account has been deleted since lacking email verification');
-        } catch (e) {
-          rethrow;
+    try {
+      UserCredential userCreds = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+      if (!toLink) {
+        final user = userCreds.user;
+        if (user.emailVerified)
+          return userCreds.user;
+        else {
+          Duration duration =
+              user.metadata.creationTime.difference(DateTime.now());
+          if (duration.inSeconds > 299) {
+            await user.delete();
+            throw PlatformException(
+                code: 'ERROR_USER_NOT_FOUND',
+                message:
+                    'Your account has been deleted since lacking email verification');
+          } else {
+            int minutesLeft = user.metadata.creationTime
+                .add(Duration(minutes: 5))
+                .difference(DateTime.now())
+                .inMinutes;
+            throw PlatformException(
+                code: 'ERROR_USER_NOT_VERIFIED',
+                message:
+                    'Please verify your account under $minutesLeft minutes.');
+          }
         }
       }
+      if (userCreds.user.email == previousEmail) {
+        await userCreds.user.linkWithCredential(creds);
+        return userCreds.user;
+      } else
+        throw PlatformException(
+            code: 'ERROR_TRIED_DIFFERENT_ACCOUNT',
+            message:
+                'The email address from your facebook account does not match the given email address');
+    } catch (e) {
+      throw PlatformException(code: e.code, message: e.message);
     }
-    if (userCreds.user.email == previousEmail) {
-      await userCreds.user.linkWithCredential(creds);
-      return userCreds.user;
-    } else
-      throw PlatformException(
-          code: 'ERROR_TRIED_DIFFERENT_ACCOUNT',
-          message:
-              'Unable to link facebook account with your given email address.');
   }
 
   @override
@@ -186,6 +189,10 @@ class Auth implements AuthBase {
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {
-    return _auth.sendPasswordResetEmail(email: email);
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      throw PlatformException(code: e.code, message: e.message);
+    }
   }
 }

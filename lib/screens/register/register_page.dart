@@ -1,12 +1,12 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:konnect/models/konnector.dart';
+import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
 import 'package:konnect/utils/dimensions.dart';
 import 'package:konnect/validators/form_validator.dart';
 import 'package:konnect/widgets/image_input.dart';
+import 'package:provider/provider.dart';
 // import 'package:konnect/widgets/toast_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -54,8 +54,10 @@ class _RegisterPageState extends State<RegisterPage> {
     return showErrorText ? widget.emptyname : null;
   }
 
+  AuthBase auth;
   @override
   Widget build(BuildContext context) {
+    auth = Provider.of<AuthBase>(context, listen: false);
     myDim = Dimensions(context);
     const spaceBox = SizedBox(
       height: 10.0,
@@ -172,22 +174,27 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _buildSubmitButton() {
     return Container(
       width: double.infinity,
-      child: RaisedButton(
+      child: ElevatedButton(
         onPressed: _submit,
-        color: kColorPrimaryDark,
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) => kColorPrimary),
+            shape: MaterialStateProperty.resolveWith<OutlinedBorder>(
+              (Set<MaterialState> states) => RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  side: BorderSide(color: Colors.transparent)),
+            )),
         child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Text('Submit'),
         ),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25.0),
-            side: BorderSide(color: Colors.transparent)),
       ),
     );
   }
 
   void _submit() async {
-    User thisUser = widget.userToRegister;
+    await auth.signOut();
+    //User thisUser = widget.userToRegister;
     // Konnector registeredUser = Konnector(
     //     id: thisUser.uid,
     //     name: name,
@@ -203,7 +210,7 @@ class _RegisterPageState extends State<RegisterPage> {
     //   'phoneNo': registeredUser.phoneNo
     // });
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isRegistered', true);
+    prefs.setString('user', 'user');
     Navigator.of(context).pop();
   }
 

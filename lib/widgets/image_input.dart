@@ -109,7 +109,7 @@ class _ImageInputState extends State<ImageInput> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                FlatButton.icon(
+                TextButton.icon(
                     label: Text(
                       'Open Camera',
                       style:  Theme.of(context).textTheme.bodyText1
@@ -121,7 +121,7 @@ class _ImageInputState extends State<ImageInput> {
                 Padding(
                   padding: EdgeInsets.only(top: 15.0),
                 ),
-                FlatButton.icon(
+                TextButton.icon(
                     label: Text(
                       'Choose from Gallery',
                     ),

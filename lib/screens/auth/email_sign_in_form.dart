@@ -6,6 +6,7 @@ import 'package:konnect/models/email_sign_in_model.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
 import 'package:konnect/widgets/platform_alert_dialog.dart';
+import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
 import 'package:provider/provider.dart';
 
 class EmailSignInForm extends StatefulWidget {
@@ -59,8 +60,9 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
       model.updateLinkingStatus();
       await model.submit();
       if (model.toPop())
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (ctx) => LandingManager()));
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (ctx) => LandingManager()),
+            (Route<dynamic> route) => false);
       else
         _toggleFormType();
     } on PlatformException catch (e) {
@@ -83,7 +85,6 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
       ).show(context);
     }
   }
-
 
   void _emailEditingComplete() {
     final newFocus = model.emailValidator.isValid(model.email)
@@ -236,16 +237,19 @@ class _EmailSignInFormState extends State<EmailSignInForm> {
               controller: _passwordController,
               focusNode: _passwordFocusNode,
               decoration: InputDecoration(
-                suffix: GestureDetector(
-                    child: Icon(
-                      _showPass ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.grey.shade500,
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _showPass = !_showPass;
-                      });
-                    }),
+                suffix: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: GestureDetector(
+                      child: Icon(
+                        _showPass ? Icons.visibility : Icons.visibility_off,
+                        color: Colors.grey.shade500,
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _showPass = !_showPass;
+                        });
+                      }),
+                ),
                 hintText: 'At least 6 characters',
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide.none,

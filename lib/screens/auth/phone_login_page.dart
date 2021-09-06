@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:konnect/sevices/phone_auth_model.dart';
+import 'package:konnect/models/phone_auth_model.dart';
 import 'package:provider/provider.dart';
 
 import '../misc/phone_login_ui.dart';

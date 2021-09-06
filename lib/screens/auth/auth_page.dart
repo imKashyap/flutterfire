@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/models/email_sign_in_model.dart';
-import 'package:konnect/screens/auth/email_sign_in_form.dart';
 import 'package:konnect/sevices/auth.dart';
 import 'package:konnect/utils/colors.dart';
+import 'package:konnect/utils/dimensions.dart';
 import 'package:konnect/widgets/platform_exception_alert_dialog.dart';
 import 'package:provider/provider.dart';
 
-import '../chat/home_page.dart';
 import 'phone_login_page.dart';
 
 class AuthPage extends StatefulWidget {
+  static const String routeName = '/auth';
   @override
   _AuthPageState createState() => _AuthPageState();
 }
@@ -22,9 +22,10 @@ class _AuthPageState extends State<AuthPage> {
   bool _toLinkFb = false;
   String _emailToLink = '';
   AuthCredential _credsToLink;
-
+  Dimensions myDim;
   @override
   Widget build(BuildContext context) {
+    myDim = Dimensions(context);
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -32,7 +33,7 @@ class _AuthPageState extends State<AuthPage> {
           children: [
             _buildBackgroundScreen(),
             Container(
-              height: 500.0,
+              height: myDim.height * 0.70,
               decoration: BoxDecoration(
                   gradient: LinearGradient(
                       colors: [Colors.transparent, Colors.black],
@@ -64,12 +65,16 @@ class _AuthPageState extends State<AuthPage> {
 
   Padding _buildInteractionScreen(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
+      padding: EdgeInsets.only(
+        top: myDim.height * 0.01,
+        right: myDim.width * 0.06,
+        left: myDim.width * 0.06,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const SizedBox(
-            height: 100.0,
+          SizedBox(
+            height: myDim.height * 0.15,
           ),
           Image.asset(
             'assets/images/logo.png',
@@ -88,10 +93,11 @@ class _AuthPageState extends State<AuthPage> {
           ),
           Container(
             width: double.infinity,
-            child: RaisedButton(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                  side: BorderSide(color: Colors.transparent)),
+            child: ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                    (Set<MaterialState> states) => kColorPrimary),
+              ),
               onPressed: _isLoading ? null : () => _signInWithEmail(context),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -102,7 +108,6 @@ class _AuthPageState extends State<AuthPage> {
                       ),
                 ),
               ),
-              color: kColorPrimary,
             ),
           ),
           buildSocialLoginButton(context,
@@ -137,7 +142,7 @@ class _AuthPageState extends State<AuthPage> {
 
   Container _buildBackgroundScreen() {
     return Container(
-      height: 500.0,
+      height: myDim.height * 0.70,
       decoration: BoxDecoration(
           image: DecorationImage(
               alignment: Alignment.topCenter,
@@ -160,14 +165,14 @@ class _AuthPageState extends State<AuthPage> {
                   ),
             )
           : Container(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              padding: EdgeInsets.symmetric(vertical: myDim.height * 0.015),
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.white),
-                  borderRadius: BorderRadius.all(Radius.circular(25.0))),
+                  borderRadius: BorderRadius.all(Radius.circular(4.0))),
               child: Row(
                 children: [
-                  const SizedBox(
-                    width: 30.0,
+                  SizedBox(
+                    width: myDim.width * 0.07,
                   ),
                   Container(width: 23.0, height: 23.0, child: icon),
                   const SizedBox(

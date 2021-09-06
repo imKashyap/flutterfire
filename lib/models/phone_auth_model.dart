@@ -76,7 +76,6 @@ class PhoneAuthModel with FormValidator, ChangeNotifier {
     };
     PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
         (String verificationId) {
-      print("verification code: " + verificationId);
       verId = verificationId;
     };
     try {
@@ -110,7 +109,7 @@ class PhoneAuthModel with FormValidator, ChangeNotifier {
         return credential;
     } catch (e) {
       print("Failed to sign in: " + e.toString());
-      rethrow;
+      throw PlatformException(code: e.code, message: e.message);
     }
   }
 }

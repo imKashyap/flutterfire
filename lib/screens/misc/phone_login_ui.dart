@@ -1,9 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:international_phone_input/international_phone_input.dart';
 import 'package:konnect/managers/email_signin_manager.dart';
 import 'package:konnect/models/email_sign_in_model.dart';
-import 'package:konnect/sevices/phone_auth_model.dart';
+import 'package:konnect/screens/chat/home_page.dart';
+import 'package:konnect/screens/register/register_page.dart';
+import 'package:konnect/models/phone_auth_model.dart';
+import 'package:konnect/widgets/platform_alert_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/colors.dart';
 import '../../utils/dimensions.dart';
 import 'otp_page_ui.dart';
@@ -48,7 +53,7 @@ class _PhoneLOginUIState extends State<PhoneLoginUI> {
         textScaleFactor: myDim.textScaleFactor,
         style: Theme.of(context)
             .textTheme
-            .headline6
+            .subtitle2
             .copyWith(fontWeight: FontWeight.bold),
       ),
       SizedBox(height: 10.0),
@@ -162,22 +167,34 @@ class _PhoneLOginUIState extends State<PhoneLoginUI> {
                       creds: creds,
                     )),
             ModalRoute.withName('\main'));
-    } catch (e) {
-      print("error " + e.message);
+      else {
+        // SharedPreferences prefs = await SharedPreferences.getInstance();
+        // if (prefs.getString('user') != null)
+        //   Navigator.of(context).pushAndRemoveUntil(
+        //       MaterialPageRoute(builder: (context) => HomePage()),
+        //       ModalRoute.withName('\main'));
+        // else
+        //   Navigator.of(context).pushAndRemoveUntil(
+        //       MaterialPageRoute(
+        //           builder: (context) => RegisterPage(model.userToLink)),
+        //       ModalRoute.withName('\main'));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (ctx) => OtpPageUI(
+              model: model,
+            ),
+          ),
+        );
+      }
+    } on PlatformException catch (e) {
+      PlatformAlertDialog(
+        title: 'Failed to verify Phone number',
+        content: e.message,
+        defaultActionText: 'OK',
+      ).show(context);
     }
     setState(() {
       _isLoading = false;
     });
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (ctx) => OtpPageUI(
-          model: model,
-        ),
-      ),
-    );
-  }
-
-  void showSnackbar(String message) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
   }
 }

@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
         home: LandingManager(),
         routes: {
           '\main': (ctx) => LandingManager(),
+          '\auth': (ctx) => AuthPage(),
         },
       ),
     );

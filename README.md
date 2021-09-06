@@ -1,11 +1,13 @@
-# Konnect
+# FlutterFire 🔥
 
-* This application is a chatting application built in flutter and backend in firebase.
+* This is getting started application for all trendy apps that require user profile creation and maintenance.
+* It helps up in setting up authentication service for your application using Firebase using the most popular methods.
 
 
 * The key features of the application are:
-1) User Authentication using email/Google/Phone/Facebook
-2) Personal as well as Group chat
+1) User Authentication using email/Google/Phone/Facebook.
+2) Email Verification
+3) Create Update and Delete Profile.
 
 
 ## Screenshots 
@@ -30,7 +32,7 @@
 Download or clone this repo by using the link below:
 
 ```
-https://github.com/imKashyap/Shopify.git
+https://github.com/imKashyap/flutterfire.git
 ```
 **Step 2:**
 Go to project root and execute the following command in console to get the required dependencies: 
